@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/ImageRecognition.dir/src/ImGuiController.cpp.o CMakeFiles/ImageRecognition.dir/app.cpp.o  -o ../../bin/ImageRecognition  libIMGUI.a libglad.a ../../dependencies/GLFW/lib/libglfw3.a 

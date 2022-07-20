@@ -1,9 +1,5 @@
 #include "ImGuiController.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/imgui_impl_glfw.h"
-
 // call the bindings and set preferences for the window style
 void ImGuiController::Init(GLFWwindow* window, char const* glsl_version)
 {
