@@ -1,7 +1,0 @@
-/media/alejandro/data/projects/ImageRecognition/ImageRecognition/CMakeFiles/rebuild_cache.dir
-/media/alejandro/data/projects/ImageRecognition/ImageRecognition/CMakeFiles/edit_cache.dir
-/media/alejandro/data/projects/ImageRecognition/ImageRecognition/ImageRecognition/CMakeFiles/rebuild_cache.dir
-/media/alejandro/data/projects/ImageRecognition/ImageRecognition/ImageRecognition/CMakeFiles/edit_cache.dir
-/media/alejandro/data/projects/ImageRecognition/ImageRecognition/ImageRecognition/CMakeFiles/ImageRecognition.dir
-/media/alejandro/data/projects/ImageRecognition/ImageRecognition/ImageRecognition/CMakeFiles/glad.dir
-/media/alejandro/data/projects/ImageRecognition/ImageRecognition/ImageRecognition/CMakeFiles/IMGUI.dir
