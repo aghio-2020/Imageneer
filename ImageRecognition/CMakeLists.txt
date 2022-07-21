@@ -21,7 +21,7 @@ file(GLOB_RECURSE SOURCES
      "${SOURCE_DIR}/*.cpp")
 
 add_library(IMGUI STATIC)
-target_sources( IMGUI
+target_sources(IMGUI
 PRIVATE
 	${IMGUI_DIR}/imgui_demo.cpp
 	${IMGUI_DIR}/imgui_draw.cpp
@@ -56,7 +56,7 @@ if(WIN32)
 	target_link_libraries(glad "${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/glfw3.lib")
 	target_link_libraries(${PROJECT_NAME} IMGUI glad kernel32 user32 gdi32 opengl32 "${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/glfw3.lib")
 elseif(UNIX)
-	target_link_libraries(IMGUI ${OPENGL_gl_LIBRARY} "${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a")
-	target_link_libraries(glad ${OPENGL_gl_LIBRARY} "${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a")
-	target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY} IMGUI glad "${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a")
+	target_link_libraries(IMGUI pthread ${OPENGL_gl_LIBRARY} dl ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a)
+	target_link_libraries(glad pthread ${OPENGL_gl_LIBRARY} dl ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a)
+	target_link_libraries(${PROJECT_NAME} IMGUI glad ${OPENGL_gl_LIBRARY} dl ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a)
 endif()
