@@ -1,6 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #include "ImGuiController.h"
 
 #include <iostream>
@@ -42,7 +46,7 @@ int main()
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(500, 400, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -51,7 +55,23 @@ int main()
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         throw("Unable to contenxt to OpenGL");
 
-    std::system("PAUSE");
+    //class to control the ui
+    ImGuiController imgui;
+    imgui.Init(window, glsl_version);
+    while (!glfwWindowShouldClose(window))
+    {
+        glfwPollEvents();
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(0.9f, 0.3f, 0.5f, 0.2f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        imgui.NewFrame();
+        imgui.Update();
+        imgui.Render();
+        glfwSwapBuffers(window);
+    }
+    imgui.Shutdown();
 
     return 0;
 }

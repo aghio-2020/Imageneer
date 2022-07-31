@@ -1,10 +1,15 @@
 #pragma once
 
+class ImGuiStyle;
+
 class ImGuiController
 {
 public:
 	void Init(GLFWwindow* window, char const* glsl_version);
 	void Render();
-	virtual void Update();
+	void NewFrame();
+	void Update();
 	void Shutdown();
+
+	ImGuiStyle* style;
 };
