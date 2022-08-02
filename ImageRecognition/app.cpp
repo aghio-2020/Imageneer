@@ -46,7 +46,7 @@ int main()
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(500, 400, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(gui::W_HEIGHT, gui::W_WIDTH, "Image Recognition App", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -55,23 +55,26 @@ int main()
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         throw("Unable to contenxt to OpenGL");
 
-    //class to control the ui
-    ImGuiController imgui;
-    imgui.Init(window, glsl_version);
+#ifdef _DEBUG
+    //TODO: printDebugUsefulInformation() such as window sizes, frames, etc
+#endif
+
+    gui::ImGuiController imgui_controller;
+    imgui_controller.Init(window, glsl_version);
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(0.9f, 0.3f, 0.5f, 0.2f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        imgui.NewFrame();
-        imgui.Update();
-        imgui.Render();
+        imgui_controller.NewFrame();
+        imgui_controller.Update();
+        imgui_controller.Render();
         glfwSwapBuffers(window);
     }
-    imgui.Shutdown();
+    imgui_controller.Shutdown();
 
     return 0;
 }
