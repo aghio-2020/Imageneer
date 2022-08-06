@@ -5,7 +5,7 @@
 #include <Windows.h>
 #endif
 
-#include "ImGuiController.h"
+#include "UIController.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -47,7 +47,7 @@ int main()
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(gui::W_HEIGHT, gui::W_WIDTH, "Image Recognition App", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(gui::kInitWidth, gui::kInitHeight, "Image Recognition App", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -60,7 +60,7 @@ int main()
     //TODO: printDebugUsefulInformation() such as window sizes, frames, etc
 #endif
 
-    gui::ImGuiController imgui_controller;
+    gui::UIController imgui_controller;
     imgui_controller.Init(window, glsl_version);
     while (!glfwWindowShouldClose(window))
     {
