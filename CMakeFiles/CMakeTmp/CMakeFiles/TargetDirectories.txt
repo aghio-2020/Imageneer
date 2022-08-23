@@ -1,2 +1,0 @@
-D:/src/projects/ImageRecognition/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_7817d.dir
-D:/src/projects/ImageRecognition/CMakeFiles/CMakeTmp/CMakeFiles/ALL_BUILD.dir
