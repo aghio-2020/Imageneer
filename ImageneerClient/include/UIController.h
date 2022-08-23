@@ -19,6 +19,8 @@ struct ImageData
 	 int width;
 	 int height;
 	 GLuint texture;
+
+	 void Clear() { width, height, texture = 0; loaded = false; filePath = nullptr; }
 };
 
 class UIController
@@ -32,6 +34,8 @@ public:
 private:
 	bool OpenFileExplorerDialog();
 	void LoadTextureFromFile();
+
+	bool mShouldCloseImage = true;
 
 	ImGuiStyle* mStyle;
 	GLFWwindow* mWindow;

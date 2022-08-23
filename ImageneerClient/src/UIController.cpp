@@ -43,11 +43,11 @@ namespace gui
         ImGui::NewFrame();
     }
 
-
+    //TODO: make class for making different effects to the images and use here with conditionals
 
     void UIController::Update()
     {
-        /* TODO: develop two views for the app
+        /* TODO: develop two views for the app (in the future when more features are added)
 
         if (imageIsLoaded)
             showViewLoaded();
@@ -60,7 +60,7 @@ namespace gui
 
         ImGui::SetWindowPos(ImVec2(0, 0));
 
-        ImGui::SetWindowSize(kMainWindowName, kWindowInitSize);
+        //ImGui::SetWindowSize(kMainWindowName, kWindowInitSize);
 
         ImGui::StyleColorsDark();
 
@@ -72,19 +72,29 @@ namespace gui
             if (OpenFileExplorerDialog())
             {
                 LoadTextureFromFile();
+                mShouldCloseImage = false;
             }
         }
-
-        ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2), true, ImGuiWindowFlags_HorizontalScrollbar);
         
-        if (mImageData.loaded)
+        if (!mShouldCloseImage)
         {
-            //TODO: make function to show image and determine the height and width to know how to display it
-            ImGui::Image((void*)(intptr_t)mImageData.texture, ImVec2(mImageData.width, mImageData.height));
+            ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
+
+            if (mImageData.loaded)
+            {
+                //TODO: make function to show image and determine the height and width to know how to display it
+                ImGui::Image((void*)(intptr_t)mImageData.texture, ImVec2(mImageData.width, mImageData.height));
+            }
+
+            ImGui::EndChild();
+
+            if (ImGui::Button("Close Image"))
+            {
+                mShouldCloseImage = true;
+                mImageData.Clear();
+            }
         }
         
-        ImGui::EndChild();
-
         ImGui::End();
     }
 
@@ -111,7 +121,7 @@ namespace gui
         unsigned char* image_data = stbi_load(mImageData.filePath, &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
-            puts("NULL image data");
+            std::cout << "NULL image data\n";
             return;
         }
 
@@ -123,8 +133,8 @@ namespace gui
         // Setup filtering parameters for display
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         // Upload pixels into texture
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
@@ -143,22 +153,23 @@ namespace gui
     bool UIController::OpenFileExplorerDialog()
     {
         char* outPath = NULL;
-        auto result = NFD_OpenDialog("png,jpg,bmp", NULL, &outPath);
+        nfdresult_t result = NFD_OpenDialog("png,jpg,bmp", NULL, &outPath);
 
         if (result == NFD_OKAY) {
             mImageData.filePath = outPath;
 
-            puts("Success!"); //TODO: add some sort of logging system
+            std::cout << "Success!\n"; //TODO: add some sort of logging system
+            std::cout << outPath << std::endl;
             free(outPath);
 
             return true;
         }
         else if (result == NFD_CANCEL) {
-            puts("User pressed cancel.");
+            std::cout << "User pressed cancel.\n";
             return true;
         }
         else {
-            printf("Error: %s\n", NFD_GetError());
+            std::cout << "Error: " << NFD_GetError() << std::endl;
             return false;
         }
     }

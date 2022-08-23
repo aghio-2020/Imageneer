@@ -1,64 +1,33 @@
-﻿# CMakeList.txt : CMake project for ImageRecognition
-#
 cmake_minimum_required (VERSION 3.8)
 
+project(ImageRecognition)
+
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ImageRecognition/include)
-set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/ImageRecognition/src)
-set(DEPENDENCIES_DIR ${CMAKE_SOURCE_DIR}/dependencies)
-set(GLFW_DIR ${CMAKE_SOURCE_DIR}/dependencies/GLFW)
-set(GLAD_DIR ${DEPENDENCIES_DIR}/glad)
-set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/dependencies/imgui)
-set(NFD_DIR ${DEPENDENCIES_DIR}/nativefiledialog)
-set(STB_DIR ${DEPENDENCIES_DIR}/stb)
-set(OpenGL_GL_PREFERENCE GLVND)
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/ImageRecognition/src)
 
-find_package(OpenGL REQUIRED)
+# Open CV
+################################
 
-file(GLOB_RECURSE SOURCES
-	"${INCLUDE_DIR}/*.h"
-	"${SOURCE_DIR}/*.h"
-        "${SOURCE_DIR}/*.cpp")
+# Change this directory to your installed OpenCv
+set(OPENCV_DIR D:/repos/opencv-4.6.0-download/opencv)
+# Change to the library with the correct version
+set(OPENCV_LIB_FILE_WINDOWS ${OPENCV_DIR}/build/x64/vc15/lib/opencv_world460.lib)
+# TODO: set(OPENCV_LIB_FILE_LINUX) 
 
-add_library(IMGUI STATIC)
-target_sources(IMGUI
+set(OPENCV_INCLUDE_DIR ${OPENCV_DIR}/build/include)
+
+################################
+
+add_library(${PROJECT_NAME} STATIC)
+target_sources(${PROJECT_NAME}
 PRIVATE
-	${IMGUI_DIR}/imgui_demo.cpp
-	${IMGUI_DIR}/imgui_draw.cpp
-	${IMGUI_DIR}/imgui_tables.cpp
-	${IMGUI_DIR}/imgui_widgets.cpp
-	${IMGUI_DIR}/imgui.cpp
-PRIVATE
-	${IMGUI_DIR}/imgui_impl_opengl3.cpp
-	${IMGUI_DIR}/imgui_impl_glfw.cpp
+    ${INCLUDE_DIR}/ImageRecognition.h 
+    ${SRC_DIR}/ImageRecognition.cpp
 )
-target_include_directories(IMGUI PUBLIC ${IMGUI_DIR})
-target_include_directories(IMGUI PRIVATE ${GLFW_DIR})
-target_include_directories(IMGUI PRIVATE ${GLAD_DIR})
 
-add_library(glad STATIC "${DEPENDENCIES_DIR}/glad/glad.h" "${DEPENDENCIES_DIR}/glad/glad.c")
-target_include_directories(glad PRIVATE ${DEPENDENCIES_DIR})
-target_include_directories(glad PRIVATE ${GLFW_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${OPENCV_INCLUDE_DIR})
 
-# Add source to this project's executable.
-add_executable (${PROJECT_NAME} ${SOURCES} "app.cpp")
-target_include_directories(${PROJECT_NAME} PUBLIC ${DEPENDENCIES_DIR})
-target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_DIR}/include)
-target_include_directories(${PROJECT_NAME} PUBLIC ${IMGUI_DIR})
-target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR})
-target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
-target_include_directories(${PROJECT_NAME} PUBLIC ${NFD_DIR}/include)
-target_include_directories(${PROJECT_NAME} PUBLIC ${STB_DIR})
-
-if(WIN32)
-	target_link_libraries(IMGUI kernel32 user32 gdi32 opengl32 ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/glfw3.lib)
-	target_link_libraries(glad ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/glfw3.lib)
-	target_link_libraries(${PROJECT_NAME} IMGUI glad kernel32 user32 gdi32 opengl32 ${NFD_DIR}/lib/nfd.lib ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/glfw3.lib)
-elseif(UNIX)
-	target_link_libraries(IMGUI pthread ${OPENGL_gl_LIBRARY} dl ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a)
-	target_link_libraries(glad pthread ${OPENGL_gl_LIBRARY} dl ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a)
-	target_link_libraries(${PROJECT_NAME} IMGUI glad ${NFD_DIR}/lib/libnfd.a ${OPENGL_gl_LIBRARY} dl ${CMAKE_SOURCE_DIR}/dependencies/GLFW/lib/libglfw3.a)
-endif()
-
+#TODO: Add support for Linux
+target_link_libraries(${PROJECT_NAME} ${OPENCV_LIB_FILE_WINDOWS})
