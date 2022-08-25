@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ComputerVisionFunc.h"
+
 #include <string>
 
 struct ImGuiStyle;
@@ -36,10 +38,12 @@ private:
 	void LoadTextureFromFile();
 
 	bool mShouldCloseImage = true;
+	bool mCameraOpened = false;
 
 	ImGuiStyle* mStyle;
 	GLFWwindow* mWindow;
 	ImageData mImageData;
+	img::ComputerVisionFunc mComputerVisionFunc;
 };
 
 } // gui

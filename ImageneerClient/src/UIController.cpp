@@ -14,6 +14,8 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <thread>
+#include <csignal>
 
 namespace gui
 {
@@ -21,7 +23,7 @@ namespace gui
     const ImVec2 kWindowInitSize(kInitWidth, kInitHeight);
     const ImVec2 kWindowMinSize(kMinWidth, kMinHeight);
 
-    const char* kMainWindowName = "Image Recognition";
+    const char* kMainWindowName = "Imageneer";
 
     //TODO: make class to show logs in another window, initialize here passing glfw window
 
@@ -43,29 +45,25 @@ namespace gui
         ImGui::NewFrame();
     }
 
-    //TODO: make class for making different effects to the images and use here with conditionals
+    //TODO: add some sort of logging system
 
+    //TODO: this UI controlls the data that is used for managing the rest of the application
+    //COULD: make a singleton for the data used for control of the application
+    
+    //TODO: would make sense to have a ImGuiUIController and a CVUIController for each tipe of display
+          //or just modify the images and load them here 
+    
+
+    //TODO: make class for making different effects to the images and use here
     void UIController::Update()
     {
-        /* TODO: develop two views for the app (in the future when more features are added)
-
-        if (imageIsLoaded)
-            showViewLoaded();
-        else
-            showViewSearchImage();
-
-        */
-
         ImGui::Begin(kMainWindowName);
 
         ImGui::SetWindowPos(ImVec2(0, 0));
 
-        //ImGui::SetWindowSize(kMainWindowName, kWindowInitSize);
-
         ImGui::StyleColorsDark();
 
         //TODO: add functionality with OpenCV or call OpenCV external application to process image and return new one
-        //TODO: make static library with openCV required functionality and link to this app to use the classes
 
         if (ImGui::Button("Search Image", ImVec2(100, 30)))
         {
@@ -73,6 +71,21 @@ namespace gui
             {
                 LoadTextureFromFile();
                 mShouldCloseImage = false;
+            }
+        }
+
+        //TODO: make separate thread to execute all the opencv features
+        //TODO: implement some sort of messaging/signal mechanism between the different threads
+        ImGui::SameLine();
+        if (ImGui::Button("Open Camera", ImVec2(100, 30)))
+        {
+            if (!mCameraOpened)
+            {
+                mComputerVisionFunc.openCamera();
+            }
+            else
+            {
+                std::cout << "close camera" << std::endl;
             }
         }
         
@@ -88,7 +101,7 @@ namespace gui
 
             ImGui::EndChild();
 
-            if (ImGui::Button("Close Image"))
+            if (ImGui::Button("Close Image", ImVec2(100, 30)))
             {
                 mShouldCloseImage = true;
                 mImageData.Clear();
@@ -115,7 +128,6 @@ namespace gui
 
     void UIController::LoadTextureFromFile()
     {
-        // Load from file
         int image_width = 0;
         int image_height = 0;
         unsigned char* image_data = stbi_load(mImageData.filePath, &image_width, &image_height, NULL, 4);
@@ -158,7 +170,7 @@ namespace gui
         if (result == NFD_OKAY) {
             mImageData.filePath = outPath;
 
-            std::cout << "Success!\n"; //TODO: add some sort of logging system
+            std::cout << "Success!\n"; 
             std::cout << outPath << std::endl;
             free(outPath);
 

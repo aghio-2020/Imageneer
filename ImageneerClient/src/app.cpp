@@ -6,6 +6,7 @@
 #endif
 
 #include "UIController.h"
+#include "ComputerVisionFunc.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -62,6 +63,7 @@ int main()
 
     gui::UIController imgui_controller;
     imgui_controller.Init(window, glsl_version);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
