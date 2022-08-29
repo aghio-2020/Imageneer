@@ -1,12 +1,8 @@
 #pragma once
 
-namespace img
+namespace cvFunc
 {
-	class ComputerVisionFunc
-	{
-	public:
-		ComputerVisionFunc() = default;
-		void openCamera();
-		void showImage(const char* filepath);
-	};
+	void openCamera();
+	void showImage(const char* filepath);
+	void closeWindowHandler(int signal);
 }

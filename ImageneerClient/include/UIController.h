@@ -2,8 +2,6 @@
 
 #include "ComputerVisionFunc.h"
 
-#include <string>
-
 struct ImGuiStyle;
 struct ImVec2;
 
@@ -16,13 +14,13 @@ const int kMinWidth = 400;
 
 struct ImageData
 {
-	 char *filePath;
-	 bool loaded = false;
-	 int width;
-	 int height;
-	 GLuint texture;
+	char* filePath;
+	bool loaded = false;
+	int width;
+	int height;
+	GLuint texture;
 
-	 void Clear() { width, height, texture = 0; loaded = false; filePath = nullptr; }
+	void Clear() { width, height, texture = 0; loaded = false; filePath = nullptr; }
 };
 
 class UIController
@@ -34,6 +32,7 @@ public:
 	void Update();
 	void Shutdown();
 private:
+	void InitAllSignals();
 	bool OpenFileExplorerDialog();
 	void LoadTextureFromFile();
 
@@ -43,7 +42,6 @@ private:
 	ImGuiStyle* mStyle;
 	GLFWwindow* mWindow;
 	ImageData mImageData;
-	img::ComputerVisionFunc mComputerVisionFunc;
 };
 
 } // gui

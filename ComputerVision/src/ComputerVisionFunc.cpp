@@ -5,19 +5,25 @@
 #include "ComputerVisionFunc.h"
 
 #include <iostream>
+#include <csignal>
 
-namespace img
+namespace cvFunc
 {
 	const char* kCameraWindowName = "Camera Display";
 
-	void ComputerVisionFunc::showImage(const char *filepath)
+	void showImage(const char *filepath)
 	{
 		cv::Mat img = cv::imread(filepath);
 		cv::imshow("Image", img);
 		cv::waitKey(0);
 	}
 
-	void ComputerVisionFunc::openCamera()
+	void closeWindowHandler(int signal)
+	{
+		cv::destroyWindow(kCameraWindowName);
+	}
+
+	void openCamera()
 	{
 		cv::Mat image;
 
@@ -27,6 +33,7 @@ namespace img
 
 		if (!capture.isOpened()) 
 		{
+			//TODO: logging system
 			std::cout << "cannot open camera";
 		}
 

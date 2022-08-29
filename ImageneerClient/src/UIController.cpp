@@ -19,10 +19,6 @@
 
 namespace gui
 {
-
-    const ImVec2 kWindowInitSize(kInitWidth, kInitHeight);
-    const ImVec2 kWindowMinSize(kMinWidth, kMinHeight);
-
     const char* kMainWindowName = "Imageneer";
 
     //TODO: make class to show logs in another window, initialize here passing glfw window
@@ -33,9 +29,15 @@ namespace gui
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.IniFilename = nullptr;
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
         mWindow = window;
+    }
+
+    void UIController::InitAllSignals()
+    {
+        std::signal(SIGINT, cvFunc::closeWindowHandler);
     }
 
     void UIController::NewFrame()
@@ -63,6 +65,10 @@ namespace gui
 
         ImGui::StyleColorsDark();
 
+        int width, height;
+        glfwGetWindowSize(mWindow, &width, &height);
+        ImGui::SetWindowSize(ImVec2(width, height));
+
         //TODO: add functionality with OpenCV or call OpenCV external application to process image and return new one
 
         if (ImGui::Button("Search Image", ImVec2(100, 30)))
@@ -77,15 +83,20 @@ namespace gui
         //TODO: make separate thread to execute all the opencv features
         //TODO: implement some sort of messaging/signal mechanism between the different threads
         ImGui::SameLine();
-        if (ImGui::Button("Open Camera", ImVec2(100, 30)))
+        if (!mCameraOpened)
         {
-            if (!mCameraOpened)
+            if (ImGui::Button("Open Camera", ImVec2(100, 30)))
             {
-                mComputerVisionFunc.openCamera();
+                cvFunc::openCamera();
+                mCameraOpened = true;
             }
-            else
+        }
+        else
+        {
+            if (ImGui::Button("Close Camera", ImVec2(100, 30)))
             {
-                std::cout << "close camera" << std::endl;
+                std::raise(SIGINT);
+                mCameraOpened = false;
             }
         }
         
