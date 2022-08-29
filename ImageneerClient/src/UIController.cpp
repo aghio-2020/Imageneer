@@ -35,11 +35,6 @@ namespace gui
         mWindow = window;
     }
 
-    void UIController::InitAllSignals()
-    {
-        std::signal(SIGINT, cvFunc::closeWindowHandler);
-    }
-
     void UIController::NewFrame()
     {
         ImGui_ImplOpenGL3_NewFrame();
@@ -95,7 +90,6 @@ namespace gui
         {
             if (ImGui::Button("Close Camera", ImVec2(100, 30)))
             {
-                std::raise(SIGINT);
                 mCameraOpened = false;
             }
         }

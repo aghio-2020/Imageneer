@@ -32,7 +32,6 @@ public:
 	void Update();
 	void Shutdown();
 private:
-	void InitAllSignals();
 	bool OpenFileExplorerDialog();
 	void LoadTextureFromFile();
 
