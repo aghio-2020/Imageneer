@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComputerVisionFunc.h"
+#include <mutex>
 
 struct ImGuiStyle;
 struct ImVec2;
@@ -35,8 +35,11 @@ private:
 	bool OpenFileExplorerDialog();
 	void LoadTextureFromFile();
 
-	bool mShouldCloseImage = true;
+	bool mShowImage = false;
 	bool mCameraOpened = false;
+
+	std::thread mCVCameraThread;
+	std::thread mCVImgProcThread;
 
 	ImGuiStyle* mStyle;
 	GLFWwindow* mWindow;

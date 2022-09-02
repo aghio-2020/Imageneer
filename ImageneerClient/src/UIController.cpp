@@ -11,10 +11,10 @@
 #include <stb_image.h>
 
 #include "UIController.h"
+#include "ComputerVisionFunc.h"
 
 #include <iostream>
 #include <cstdlib>
-#include <thread>
 #include <csignal>
 
 namespace gui
@@ -58,11 +58,11 @@ namespace gui
 
         ImGui::SetWindowPos(ImVec2(0, 0));
 
-        ImGui::StyleColorsDark();
+        ImGui::StyleColorsLight();
 
         int width, height;
         glfwGetWindowSize(mWindow, &width, &height);
-        ImGui::SetWindowSize(ImVec2(width, height));
+        ImGui::SetWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height)));
 
         //TODO: add functionality with OpenCV or call OpenCV external application to process image and return new one
 
@@ -71,7 +71,7 @@ namespace gui
             if (OpenFileExplorerDialog())
             {
                 LoadTextureFromFile();
-                mShouldCloseImage = false;
+                mShowImage = true;
             }
         }
 
@@ -82,7 +82,7 @@ namespace gui
         {
             if (ImGui::Button("Open Camera", ImVec2(100, 30)))
             {
-                cvFunc::openCamera();
+                mCVCameraThread = std::thread(cvFunc::openCamera);
                 mCameraOpened = true;
             }
         }
@@ -90,29 +90,33 @@ namespace gui
         {
             if (ImGui::Button("Close Camera", ImVec2(100, 30)))
             {
+                std::raise(SIGINT);
                 mCameraOpened = false;
+                mCVCameraThread.detach();
             }
         }
-        
-        if (!mShouldCloseImage)
+
+        if (mShowImage)
         {
-            ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
+            ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x,
+                ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
 
             if (mImageData.loaded)
             {
-                //TODO: make function to show image and determine the height and width to know how to display it
-                ImGui::Image((void*)(intptr_t)mImageData.texture, ImVec2(mImageData.width, mImageData.height));
+                //TODO: make function to determine the height and width of window to know how to display image
+                ImGui::Image((void*)(intptr_t)mImageData.texture,
+                    ImVec2(static_cast<float>(mImageData.width), static_cast<float>(mImageData.height)));
             }
 
             ImGui::EndChild();
 
             if (ImGui::Button("Close Image", ImVec2(100, 30)))
             {
-                mShouldCloseImage = true;
+                mShowImage = false;
                 mImageData.Clear();
             }
         }
-        
+
         ImGui::End();
     }
 
@@ -129,6 +133,8 @@ namespace gui
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
+        if (mCVCameraThread.joinable()) { mCVCameraThread.join(); }
+        if (mCVImgProcThread.joinable()) { mCVImgProcThread.join(); }
     }
 
     void UIController::LoadTextureFromFile()

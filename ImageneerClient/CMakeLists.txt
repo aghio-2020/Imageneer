@@ -20,7 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 find_package(OpenGL REQUIRED)
 
-file(GLOB_RECURSE SOURCES
+file(GLOB_RECURSE CLIENT_SOURCES
 	"${INCLUDE_DIR}/*.h"
 	"${SOURCE_DIR}/*.h"
     "${SOURCE_DIR}/*.cpp")
@@ -46,7 +46,7 @@ target_include_directories(glad PRIVATE ${DEPENDENCIES_DIR})
 target_include_directories(glad PRIVATE ${GLFW_DIR})
 
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} ${SOURCES})
+add_executable (${PROJECT_NAME} ${CLIENT_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${DEPENDENCIES_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${IMGUI_DIR})
