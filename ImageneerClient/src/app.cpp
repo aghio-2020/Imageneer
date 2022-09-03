@@ -5,7 +5,7 @@
 #include <Windows.h>
 #endif
 
-#include "UIController.h"
+#include "ImageneerViewController.h"
 #include "ComputerVisionFunc.h"
 
 #include <iostream>
@@ -16,6 +16,8 @@ static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
+
+const char* kAppName = "Imageneer";
 
 int main()
 {
@@ -48,7 +50,7 @@ int main()
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(gui::kInitWidth, gui::kInitHeight, "Image Recognition App", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(gui::kInitWidth, gui::kInitHeight, kAppName, NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -61,8 +63,8 @@ int main()
     //TODO: printDebugUsefulInformation() such as window sizes, frames, etc
 #endif
 
-    gui::UIController imgui_controller;
-    imgui_controller.Init(window, glsl_version);
+    gui::ImageneerController uicontroller;
+    uicontroller.Init(window, glsl_version);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -72,12 +74,13 @@ int main()
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        imgui_controller.NewFrame();
-        imgui_controller.Update();
-        imgui_controller.Render();
+        //TODO: the controller has to call the view for these functions
+        uicontroller.NewFrame();
+        uicontroller.Update();
+        uicontroller.Render();
         glfwSwapBuffers(window);
     }
-    imgui_controller.Shutdown();
+    uicontroller.Shutdown();
 
     return 0;
 }

@@ -1,57 +1,69 @@
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-
 #include "ComputerVisionFunc.h"
 
 #include <iostream>
 #include <csignal>
+#include <memory>
 
 namespace cvFunc
 {
 	const char* kCameraWindowName = "Camera Display";
-	bool showCamera;
 
-	//COULD: make handleImg() to handle all the image processing in one thread
-
-	void showImage(const char *filepath)
+	struct ComputerVisionFunc::ComputerVisionFuncData
 	{
-		cv::Mat img = cv::imread(filepath);
-		cv::imshow("Image", img);
-		cv::waitKey(0);
+		bool mShowCamera;
+		std::mutex mMutex;
+		cv::Mat mTmpImage;
+	};
+
+	ComputerVisionFunc::~ComputerVisionFunc() = default;
+
+	ComputerVisionFunc::ComputerVisionFunc() : mData(std::make_unique<ComputerVisionFuncData>()) {}
+
+	bool ComputerVisionFunc::IsCameraOpened()
+	{
+		return mData->mShowCamera;
 	}
 
-	void closeCameraSignalHandler(int sigint)
+	void ComputerVisionFunc::StopShowingCamera()
 	{
-		showCamera = false;
+		mData->mMutex.lock();
+		mData->mShowCamera = false;
+		mData->mMutex.unlock();
 	}
 
-	//COULD: make handleCamera() to deal with all the camera posibilities in the thread
-
-	void openCamera()
+	void ComputerVisionFunc::SaveImage(const char *path)
 	{
-		showCamera = true;
+		cv::imwrite(path, mData->mTmpImage);
+	}
 
+	void ComputerVisionFunc::HandleCamera(cv::VideoCapture& capture, cv::Mat& image)
+	{
+		//add Effects Conditions Here
+		capture >> image;
+		cv::imshow(kCameraWindowName, image);
+		cv::waitKey(25);
+	}
+
+	void ComputerVisionFunc::OpenCamera()
+	{
 		cv::Mat image;
-
 		cv::VideoCapture capture(0);
-
-		cv::namedWindow(kCameraWindowName);
 
 		if (!capture.isOpened()) 
 		{
-			//TODO: logging system
-			std::cout << "cannot open camera";
+			std::cout << "cannot open camera\n";
+			return;
 		}
 
-		//TODO: add another signaling/messaging system more adecuate for this app
-		std::signal(SIGINT, closeCameraSignalHandler);
+		cv::namedWindow(kCameraWindowName);
 
-		while (showCamera) 
+		mData->mShowCamera = true;
+
+		//TODO: add another signaling/messaging system more adecuate for this app
+
+		while (mData->mShowCamera)
 		{
-			capture >> image;
-			cv::imshow(kCameraWindowName, image);
-			cv::waitKey(25);
+			HandleCamera(capture, image);
 		}
 		
 		cv::destroyWindow(kCameraWindowName);

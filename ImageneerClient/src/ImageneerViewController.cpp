@@ -10,12 +10,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include "UIController.h"
-#include "ComputerVisionFunc.h"
+#include "ImageneerViewController.h"
 
 #include <iostream>
 #include <cstdlib>
 #include <csignal>
+#include <chrono>
+
+//TODO: implement with MVC
 
 namespace gui
 {
@@ -23,8 +25,7 @@ namespace gui
 
     //TODO: make class to show logs in another window, initialize here passing glfw window
 
-    // call the bindings
-    void UIController::Init(GLFWwindow* window, char const* glsl_version)
+    void ImageneerController::Init(GLFWwindow* window, char const* glsl_version)
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -35,7 +36,7 @@ namespace gui
         mWindow = window;
     }
 
-    void UIController::NewFrame()
+    void ImageneerController::NewFrame()
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -47,88 +48,100 @@ namespace gui
     //TODO: this UI controlls the data that is used for managing the rest of the application
     //COULD: make a singleton for the data used for control of the application
     
-    //TODO: would make sense to have a ImGuiUIController and a CVUIController for each tipe of display
+    //TODO: would make sense to have a ImGuiImageneerController and a CVImageneerController for each tipe of display
           //or just modify the images and load them here 
     
 
     //TODO: make class for making different effects to the images and use here
-    void UIController::Update()
+    void ImageneerController::Update()
     {
-        ImGui::Begin(kMainWindowName);
+        ImGui::Begin(kMainWindowName, nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         ImGui::SetWindowPos(ImVec2(0, 0));
 
-        ImGui::StyleColorsLight();
+        ImGui::StyleColorsClassic();
 
-        int width, height;
-        glfwGetWindowSize(mWindow, &width, &height);
-        ImGui::SetWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height)));
+        glfwGetWindowSize(mWindow, &mData.mMainWindowWidth, &mData.mMainWindowHeight);
+        ImGui::SetWindowSize(ImVec2(static_cast<float>(mData.mMainWindowWidth), static_cast<float>(mData.mMainWindowHeight)));
 
-        //TODO: add functionality with OpenCV or call OpenCV external application to process image and return new one
-
-        if (ImGui::Button("Search Image", ImVec2(100, 30)))
+        if (ImGui::Button("Search Image", ImVec2(150, 30)))
         {
             if (OpenFileExplorerDialog())
             {
                 LoadTextureFromFile();
-                mShowImage = true;
+                mData.mShowImage = true;
             }
         }
 
-        //TODO: make separate thread to execute all the opencv features
         //TODO: implement some sort of messaging/signal mechanism between the different threads
         ImGui::SameLine();
-        if (!mCameraOpened)
+
+        if (!mData.mCameraOpened)
         {
-            if (ImGui::Button("Open Camera", ImVec2(100, 30)))
+            if (ImGui::Button("Open Camera", ImVec2(150, 30)))
             {
-                mCVCameraThread = std::thread(cvFunc::openCamera);
-                mCameraOpened = true;
+                //TODO: if camera is disconnected, it fails
+                mCVCameraThread = std::thread(&cvFunc::ComputerVisionFunc::OpenCamera, &mCVFunc);
+                mData.mCameraOpened = true;
             }
         }
-        else
+        else if(ImGui::Button("Close Camera", ImVec2(150, 30)))
         {
-            if (ImGui::Button("Close Camera", ImVec2(100, 30)))
-            {
-                std::raise(SIGINT);
-                mCameraOpened = false;
-                mCVCameraThread.detach();
-            }
+            mCVFunc.StopShowingCamera();
+            mData.mCameraOpened = false;
+            mCVCameraThread.detach();
         }
 
-        if (mShowImage)
+        if (mData.mShowImage)
         {
             ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x,
                 ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-            if (mImageData.loaded)
+            if (mData.mImageData.loaded)
             {
                 //TODO: make function to determine the height and width of window to know how to display image
-                ImGui::Image((void*)(intptr_t)mImageData.texture,
-                    ImVec2(static_cast<float>(mImageData.width), static_cast<float>(mImageData.height)));
+                ImGui::Image((void*)(intptr_t)mData.mImageData.texture,
+                    ImVec2(static_cast<float>(mData.mImageData.width), static_cast<float>(mData.mImageData.height)));
             }
 
             ImGui::EndChild();
 
-            if (ImGui::Button("Close Image", ImVec2(100, 30)))
+            //TODO: store the original and the modified image until the user chooses to save
+            if (mData.mShowEffectsWindow)
             {
-                mShowImage = false;
-                mImageData.Clear();
+                ShowEffectsWindow();
+            }
+            else if(ImGui::Button("Effects Window", ImVec2(150, 30)))
+            {
+                mData.mShowEffectsWindow = true;
+            }
+            else
+            {
+                ImGui::SameLine();
+            }
+
+            if (ImGui::Button("Close Image", ImVec2(150, 30)))
+            {
+                mData.mShowImage = false;
+                mData.mShowEffectsWindow = false;
+                mData.mImageData.Clear();
             }
         }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
 
         ImGui::End();
     }
 
 
 
-    void UIController::Render()
+    void ImageneerController::Render()
     {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    void UIController::Shutdown()
+    void ImageneerController::Shutdown()
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
@@ -137,11 +150,28 @@ namespace gui
         if (mCVImgProcThread.joinable()) { mCVImgProcThread.join(); }
     }
 
-    void UIController::LoadTextureFromFile()
+    void ImageneerController::ShowEffectsWindow()
+    {
+        ImGui::Begin("Effects Window");
+        ImGui::SetWindowSize(ImVec2(mData.mMainWindowWidth / 2, mData.mMainWindowHeight / 2));
+
+        if (ImGui::Button("Save Image", ImVec2(150, 30)))
+        {
+            std::cout << "Saving image and stuff\n";
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Close Window", ImVec2(150, 30)))
+        {
+            mData.mShowEffectsWindow = false;
+        }
+        ImGui::End();
+    }
+
+    void ImageneerController::LoadTextureFromFile()
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mImageData.filePath, &image_width, &image_height, NULL, 4);
+        unsigned char* image_data = stbi_load(mData.mImageData.filePath, &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
@@ -166,20 +196,21 @@ namespace gui
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
         stbi_image_free(image_data);
 
-        mImageData.texture = image_texture;
-        mImageData.width = image_width;
-        mImageData.height = image_height;
+        mData.mImageData.texture = image_texture;
+        mData.mImageData.width = image_width;
+        mData.mImageData.height = image_height;
 
-        mImageData.loaded = true;
+        mData.mImageData.loaded = true;
     }
 
-    bool UIController::OpenFileExplorerDialog()
+    //COULD: add a thread for the dialogs
+    bool ImageneerController::OpenFileExplorerDialog()
     {
         char* outPath = NULL;
         nfdresult_t result = NFD_OpenDialog("png,jpg,bmp", NULL, &outPath);
 
         if (result == NFD_OKAY) {
-            mImageData.filePath = outPath;
+            mData.mImageData.filePath = outPath;
 
             std::cout << "Success!\n"; 
             std::cout << outPath << std::endl;

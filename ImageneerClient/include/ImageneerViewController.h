@@ -1,9 +1,8 @@
 #pragma once
 
 #include <mutex>
-
-struct ImGuiStyle;
-struct ImVec2;
+#include "ImageneerData.h"
+#include "computerVisionFunc.h"
 
 namespace gui
 {
@@ -12,18 +11,7 @@ const int kInitWidth = 800;
 const int kMinHeight = 300;
 const int kMinWidth = 400;
 
-struct ImageData
-{
-	char* filePath;
-	bool loaded = false;
-	int width;
-	int height;
-	GLuint texture;
-
-	void Clear() { width, height, texture = 0; loaded = false; filePath = nullptr; }
-};
-
-class UIController
+class ImageneerController
 {
 public:
 	void Init(GLFWwindow* window, char const* glsl_version);
@@ -34,16 +22,17 @@ public:
 private:
 	bool OpenFileExplorerDialog();
 	void LoadTextureFromFile();
+	void ShowEffectsWindow();
+	
+	//View component is managed by ImGui
+	ImageneerData mData;
 
-	bool mShowImage = false;
-	bool mCameraOpened = false;
+	cvFunc::ComputerVisionFunc mCVFunc;
 
 	std::thread mCVCameraThread;
 	std::thread mCVImgProcThread;
 
-	ImGuiStyle* mStyle;
 	GLFWwindow* mWindow;
-	ImageData mImageData;
 };
 
 } // gui
