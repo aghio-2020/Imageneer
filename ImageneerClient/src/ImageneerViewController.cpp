@@ -13,8 +13,6 @@
 #include "ImageneerViewController.h"
 
 #include <iostream>
-#include <cstdlib>
-#include <csignal>
 #include <chrono>
 
 //TODO: implement with MVC
@@ -25,7 +23,14 @@ namespace gui
 
     //TODO: make class to show logs in another window, initialize here passing glfw window
 
-    void ImageneerController::Init(GLFWwindow* window, char const* glsl_version)
+    ImageneerViewController::~ImageneerViewController() = default;
+
+    ImageneerViewController::ImageneerViewController() :
+        mData(std::make_unique<ImageneerData>()),
+        mWindow(nullptr)
+    {}
+
+    void ImageneerViewController::Init(GLFWwindow* window, char const* glsl_version)
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -36,24 +41,14 @@ namespace gui
         mWindow = window;
     }
 
-    void ImageneerController::NewFrame()
+    void ImageneerViewController::NewFrame()
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
     }
 
-    //TODO: add some sort of logging system
-
-    //TODO: this UI controlls the data that is used for managing the rest of the application
-    //COULD: make a singleton for the data used for control of the application
-    
-    //TODO: would make sense to have a ImGuiImageneerController and a CVImageneerController for each tipe of display
-          //or just modify the images and load them here 
-    
-
-    //TODO: make class for making different effects to the images and use here
-    void ImageneerController::Update()
+    void ImageneerViewController::Update()
     {
         ImGui::Begin(kMainWindowName, nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus);
 
@@ -61,59 +56,56 @@ namespace gui
 
         ImGui::StyleColorsClassic();
 
-        glfwGetWindowSize(mWindow, &mData.mMainWindowWidth, &mData.mMainWindowHeight);
-        ImGui::SetWindowSize(ImVec2(static_cast<float>(mData.mMainWindowWidth), static_cast<float>(mData.mMainWindowHeight)));
+        glfwGetWindowSize(mWindow, &mData->mMainWindowWidth, &mData->mMainWindowHeight);
+        ImGui::SetWindowSize(ImVec2(static_cast<float>(mData->mMainWindowWidth), static_cast<float>(mData->mMainWindowHeight)));
 
         if (ImGui::Button("Search Image", ImVec2(150, 30)))
         {
             if (OpenFileExplorerDialog())
             {
                 LoadTextureFromFile();
-                mData.mShowImage = true;
+                mData->mShowImage = true;
             }
         }
 
-        //TODO: implement some sort of messaging/signal mechanism between the different threads
         ImGui::SameLine();
 
-        if (!mData.mCameraOpened)
+        if (!mData->mCameraOpened)
         {
             if (ImGui::Button("Open Camera", ImVec2(150, 30)))
             {
-                //TODO: if camera is disconnected, it fails
                 mCVCameraThread = std::thread(&cvFunc::ComputerVisionFunc::OpenCamera, &mCVFunc);
-                mData.mCameraOpened = true;
+                mData->mCameraOpened = true;
             }
         }
-        else if(ImGui::Button("Close Camera", ImVec2(150, 30)))
+        else if (ImGui::Button("Close Camera", ImVec2(150, 30)))
         {
             mCVFunc.StopShowingCamera();
-            mData.mCameraOpened = false;
+            mData->mCameraOpened = false;
             mCVCameraThread.detach();
         }
 
-        if (mData.mShowImage)
+        if (mData->mShowImage)
         {
             ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x,
                 ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-            if (mData.mImageData.loaded)
+            if (mData->mImageData.loaded)
             {
                 //TODO: make function to determine the height and width of window to know how to display image
-                ImGui::Image((void*)(intptr_t)mData.mImageData.texture,
-                    ImVec2(static_cast<float>(mData.mImageData.width), static_cast<float>(mData.mImageData.height)));
+                ImGui::Image((void*)(intptr_t)mData->mImageData.texture,
+                    ImVec2(static_cast<float>(mData->mImageData.width), static_cast<float>(mData->mImageData.height)));
             }
 
             ImGui::EndChild();
 
-            //TODO: store the original and the modified image until the user chooses to save
-            if (mData.mShowEffectsWindow)
+            if (mData->mShowEffectsWindow)
             {
                 ShowEffectsWindow();
             }
             else if(ImGui::Button("Effects Window", ImVec2(150, 30)))
             {
-                mData.mShowEffectsWindow = true;
+                mData->mShowEffectsWindow = true;
             }
             else
             {
@@ -122,9 +114,9 @@ namespace gui
 
             if (ImGui::Button("Close Image", ImVec2(150, 30)))
             {
-                mData.mShowImage = false;
-                mData.mShowEffectsWindow = false;
-                mData.mImageData.Clear();
+                mData->mShowImage = false;
+                mData->mShowEffectsWindow = false;
+                mData->mImageData.Clear();
             }
         }
 
@@ -133,27 +125,26 @@ namespace gui
         ImGui::End();
     }
 
-
-
-    void ImageneerController::Render()
+    void ImageneerViewController::Render()
     {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    void ImageneerController::Shutdown()
+    void ImageneerViewController::Shutdown()
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
+        mCVFunc.StopShowingCamera();
         if (mCVCameraThread.joinable()) { mCVCameraThread.join(); }
         if (mCVImgProcThread.joinable()) { mCVImgProcThread.join(); }
     }
 
-    void ImageneerController::ShowEffectsWindow()
+    void ImageneerViewController::ShowEffectsWindow()
     {
         ImGui::Begin("Effects Window");
-        ImGui::SetWindowSize(ImVec2(mData.mMainWindowWidth / 2, mData.mMainWindowHeight / 2));
+        ImGui::SetWindowSize(ImVec2(static_cast<float>(mData->mMainWindowWidth) / 2, static_cast<float>(mData->mMainWindowHeight) / 2));
 
         if (ImGui::Button("Save Image", ImVec2(150, 30)))
         {
@@ -162,16 +153,16 @@ namespace gui
         ImGui::SameLine();
         if (ImGui::Button("Close Window", ImVec2(150, 30)))
         {
-            mData.mShowEffectsWindow = false;
+            mData->mShowEffectsWindow = false;
         }
         ImGui::End();
     }
 
-    void ImageneerController::LoadTextureFromFile()
+    void ImageneerViewController::LoadTextureFromFile()
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mData.mImageData.filePath, &image_width, &image_height, NULL, 4);
+        unsigned char* image_data = stbi_load(mData->mImageData.filePath, &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
@@ -196,21 +187,21 @@ namespace gui
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
         stbi_image_free(image_data);
 
-        mData.mImageData.texture = image_texture;
-        mData.mImageData.width = image_width;
-        mData.mImageData.height = image_height;
+        mData->mImageData.texture = image_texture;
+        mData->mImageData.width = image_width;
+        mData->mImageData.height = image_height;
 
-        mData.mImageData.loaded = true;
+        mData->mImageData.loaded = true;
     }
 
     //COULD: add a thread for the dialogs
-    bool ImageneerController::OpenFileExplorerDialog()
+    bool ImageneerViewController::OpenFileExplorerDialog()
     {
         char* outPath = NULL;
         nfdresult_t result = NFD_OpenDialog("png,jpg,bmp", NULL, &outPath);
 
         if (result == NFD_OKAY) {
-            mData.mImageData.filePath = outPath;
+            mData->mImageData.filePath = outPath;
 
             std::cout << "Success!\n"; 
             std::cout << outPath << std::endl;

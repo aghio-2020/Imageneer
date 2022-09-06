@@ -1,6 +1,7 @@
 #pragma once
 
 #include "imgui.h"
+#include <cinttypes>
 
 namespace gui
 {
@@ -8,8 +9,8 @@ namespace gui
 	{
 		char* filePath;
 		bool loaded = false;
-		int width;
-		int height;
+		uint8_t width;
+		uint8_t height;
 		GLuint texture;
 
 		void Clear() { width, height, texture = 0; loaded = false; filePath = nullptr; }

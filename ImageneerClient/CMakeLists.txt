@@ -22,7 +22,6 @@ find_package(OpenGL REQUIRED)
 
 file(GLOB_RECURSE CLIENT_SOURCES
 	"${INCLUDE_DIR}/*.h"
-	"${SOURCE_DIR}/*.h"
     "${SOURCE_DIR}/*.cpp")
 
 add_library(IMGUI STATIC)

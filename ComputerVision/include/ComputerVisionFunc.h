@@ -12,9 +12,10 @@ namespace cvFunc
 		ComputerVisionFunc();
 		~ComputerVisionFunc();
 		void OpenCamera();
-		void HandleCamera(cv::VideoCapture& capture, cv::Mat& image);
+		void HandleCamera(cv::VideoCapture& capture);
 		bool IsCameraOpened();
 		void StopShowingCamera();
+		void StartShowingCamera();
 		void SaveImage(const char *path);
 	private:
 		struct ComputerVisionFuncData;

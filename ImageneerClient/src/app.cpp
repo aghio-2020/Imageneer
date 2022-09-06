@@ -1,15 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-
 #include "ImageneerViewController.h"
 #include "ComputerVisionFunc.h"
 
 #include <iostream>
-#include <cstdlib>
+#include <memory>
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -63,24 +59,24 @@ int main()
     //TODO: printDebugUsefulInformation() such as window sizes, frames, etc
 #endif
 
-    gui::ImageneerController uicontroller;
-    uicontroller.Init(window, glsl_version);
+    std::unique_ptr<gui::ImageneerViewController> uicontroller = std::make_unique<gui::ImageneerViewController>();
+    uicontroller->Init(window, glsl_version);
 
+    int display_w, display_h;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         //TODO: the controller has to call the view for these functions
-        uicontroller.NewFrame();
-        uicontroller.Update();
-        uicontroller.Render();
+        uicontroller->NewFrame();
+        uicontroller->Update();
+        uicontroller->Render();
         glfwSwapBuffers(window);
     }
-    uicontroller.Shutdown();
+    uicontroller->Shutdown();
 
     return 0;
 }

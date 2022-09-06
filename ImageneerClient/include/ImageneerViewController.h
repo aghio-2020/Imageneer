@@ -1,8 +1,10 @@
 #pragma once
 
-#include <mutex>
 #include "ImageneerData.h"
 #include "computerVisionFunc.h"
+
+#include <mutex>
+#include <memory>
 
 namespace gui
 {
@@ -11,9 +13,11 @@ const int kInitWidth = 800;
 const int kMinHeight = 300;
 const int kMinWidth = 400;
 
-class ImageneerController
+class ImageneerViewController
 {
 public:
+	~ImageneerViewController();
+	ImageneerViewController();
 	void Init(GLFWwindow* window, char const* glsl_version);
 	void Render();
 	void NewFrame();
@@ -23,10 +27,8 @@ private:
 	bool OpenFileExplorerDialog();
 	void LoadTextureFromFile();
 	void ShowEffectsWindow();
-	
-	//View component is managed by ImGui
-	ImageneerData mData;
 
+	std::unique_ptr<ImageneerData> mData;
 	cvFunc::ComputerVisionFunc mCVFunc;
 
 	std::thread mCVCameraThread;

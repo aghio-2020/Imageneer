@@ -1,7 +1,6 @@
 #include "ComputerVisionFunc.h"
 
 #include <iostream>
-#include <csignal>
 #include <memory>
 
 namespace cvFunc
@@ -10,6 +9,9 @@ namespace cvFunc
 
 	struct ComputerVisionFunc::ComputerVisionFuncData
 	{
+		ComputerVisionFuncData() :
+			mShowCamera(true)
+		{}
 		bool mShowCamera;
 		std::mutex mMutex;
 		cv::Mat mTmpImage;
@@ -31,22 +33,37 @@ namespace cvFunc
 		mData->mMutex.unlock();
 	}
 
+	void ComputerVisionFunc::StartShowingCamera()
+	{
+		mData->mMutex.lock();
+		mData->mShowCamera = true;
+		mData->mMutex.unlock();
+	}
+
 	void ComputerVisionFunc::SaveImage(const char *path)
 	{
 		cv::imwrite(path, mData->mTmpImage);
 	}
 
-	void ComputerVisionFunc::HandleCamera(cv::VideoCapture& capture, cv::Mat& image)
+	void ComputerVisionFunc::HandleCamera(cv::VideoCapture& capture)
 	{
+		cv::Mat image;
 		//add Effects Conditions Here
-		capture >> image;
-		cv::imshow(kCameraWindowName, image);
-		cv::waitKey(25);
+		while (mData->mShowCamera)
+		{
+			capture >> image;
+			if (image.empty())
+			{
+				mData->mShowCamera = false;
+				return;
+			}
+			cv::imshow(kCameraWindowName, image);
+			cv::waitKey(10);
+		}
 	}
 
 	void ComputerVisionFunc::OpenCamera()
 	{
-		cv::Mat image;
 		cv::VideoCapture capture(0);
 
 		if (!capture.isOpened()) 
@@ -60,11 +77,7 @@ namespace cvFunc
 		mData->mShowCamera = true;
 
 		//TODO: add another signaling/messaging system more adecuate for this app
-
-		while (mData->mShowCamera)
-		{
-			HandleCamera(capture, image);
-		}
+		HandleCamera(capture);
 		
 		cv::destroyWindow(kCameraWindowName);
 	}
