@@ -25,15 +25,17 @@ public:
 	void Shutdown();
 private:
 	bool OpenFileExplorerDialog();
+	bool OpenSaveFileDialog();
 	void LoadTextureFromFile();
 	void ShowEffectsWindow();
+	void ShowImageView();
 
-	std::unique_ptr<ImageneerData> mData;
 	cvFunc::ComputerVisionFunc mCVFunc;
 
 	std::thread mCVCameraThread;
 	std::thread mCVImgProcThread;
 
+	ImageneerDataSingleton* mDataSingletonInstance;
 	GLFWwindow* mWindow;
 };
 

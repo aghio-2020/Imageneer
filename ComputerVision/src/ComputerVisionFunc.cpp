@@ -1,60 +1,57 @@
 #include "ComputerVisionFunc.h"
 
 #include <iostream>
-#include <memory>
 
 namespace cvFunc
 {
 	const char* kCameraWindowName = "Camera Display";
 
-	struct ComputerVisionFunc::ComputerVisionFuncData
-	{
-		ComputerVisionFuncData() :
-			mShowCamera(true)
-		{}
-		bool mShowCamera;
-		std::mutex mMutex;
-		cv::Mat mTmpImage;
-	};
-
 	ComputerVisionFunc::~ComputerVisionFunc() = default;
 
-	ComputerVisionFunc::ComputerVisionFunc() : mData(std::make_unique<ComputerVisionFuncData>()) {}
+	ComputerVisionFunc::ComputerVisionFunc()
+	{
+		mDataSingletonInstance = gui::ImageneerDataSingleton::Instance();
+	}
 
 	bool ComputerVisionFunc::IsCameraOpened()
 	{
-		return mData->mShowCamera;
+		return mDataSingletonInstance->GetShowCameraView();
 	}
 
 	void ComputerVisionFunc::StopShowingCamera()
 	{
-		mData->mMutex.lock();
-		mData->mShowCamera = false;
-		mData->mMutex.unlock();
+		mMutex.lock();
+		mDataSingletonInstance->SetShowCameraView(false);
+		mMutex.unlock();
 	}
 
 	void ComputerVisionFunc::StartShowingCamera()
 	{
-		mData->mMutex.lock();
-		mData->mShowCamera = true;
-		mData->mMutex.unlock();
+		mMutex.lock();
+		mDataSingletonInstance->SetShowCameraView(true);
+		mMutex.unlock();
 	}
 
-	void ComputerVisionFunc::SaveImage(const char *path)
+	void ComputerVisionFunc::SetTmpFile(const char* path)
 	{
-		cv::imwrite(path, mData->mTmpImage);
+		mDataSingletonInstance->GetImageDataReference().mTmpImage = cv::imread(path);
+	}
+
+	void ComputerVisionFunc::SaveImage(const char* path)
+	{
+		cv::imwrite(path, mDataSingletonInstance->GetImageDataReference().mTmpImage);
 	}
 
 	void ComputerVisionFunc::HandleCamera(cv::VideoCapture& capture)
 	{
 		cv::Mat image;
 		//add Effects Conditions Here
-		while (mData->mShowCamera)
+		while (mDataSingletonInstance->GetShowCameraView())
 		{
 			capture >> image;
-			if (image.empty())
+			if (image.empty() || !capture.isOpened())
 			{
-				mData->mShowCamera = false;
+				mDataSingletonInstance->SetShowCameraView(false);
 				return;
 			}
 			cv::imshow(kCameraWindowName, image);
@@ -74,7 +71,7 @@ namespace cvFunc
 
 		cv::namedWindow(kCameraWindowName);
 
-		mData->mShowCamera = true;
+		mDataSingletonInstance->SetShowCameraView(true);
 
 		//TODO: add another signaling/messaging system more adecuate for this app
 		HandleCamera(capture);

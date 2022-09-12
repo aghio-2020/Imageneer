@@ -8,3 +8,4 @@ project ("Imageneer")
 # Include sub-projects.
 add_subdirectory ("ImageneerClient")
 add_subdirectory ("ComputerVision")
+add_subdirectory ("ImageneerUtils")

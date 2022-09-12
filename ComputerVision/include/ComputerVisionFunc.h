@@ -4,6 +4,10 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include <memory>
+
+#include "ImageneerData.h"
+
 namespace cvFunc
 {
 	class ComputerVisionFunc
@@ -16,9 +20,10 @@ namespace cvFunc
 		bool IsCameraOpened();
 		void StopShowingCamera();
 		void StartShowingCamera();
-		void SaveImage(const char *path);
+		void SetTmpFile(const char* path);
+		void SaveImage(const char* path);
 	private:
-		struct ComputerVisionFuncData;
-		std::unique_ptr<ComputerVisionFuncData> mData;
+		gui::ImageneerDataSingleton* mDataSingletonInstance;
+		std::mutex mMutex;
 	};
 }
