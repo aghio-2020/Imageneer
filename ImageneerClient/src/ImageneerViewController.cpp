@@ -253,12 +253,12 @@ namespace gui
     {
         auto file = pfd::open_file("Choose an image file", pfd::path::home(),
             { "Image Files (.jpg, .png, .bmp)", "*.jpg, m *.jpeg, *.png, *.bmp" },
-            pfd::opt::force_overwrite);
+            pfd::opt::force_overwrite).result();
 
 
-        if (!file.result().empty())
+        if (!file.empty())
         {
-            std::string outPath = file.result().front();
+            std::string outPath = file.front();
             mDataSingletonInstance->GetImageDataReference().mFilePath = const_cast<char*>(outPath.c_str());
             mCVFunc.SetTmpFile(const_cast<char*>(outPath.c_str()));
             return true;
@@ -273,10 +273,21 @@ namespace gui
 
     bool ImageneerViewController::OpenSaveFileDialog()
     {
-        char* outPath = NULL;
-        mCVFunc.SaveImage(outPath);
-        mDataSingletonInstance->GetImageDataReference().mFilePath = outPath;
-        return true;
+        auto destination = pfd::save_file("Select a file", ".",
+            { "Image Files", "*.png *.jpg *.jpeg *.bmp" },
+            pfd::opt::force_overwrite).result();
+
+        if (!destination.empty())
+        {
+            mCVFunc.SaveImage(destination.c_str());
+            mDataSingletonInstance->GetImageDataReference().mFilePath = const_cast<char*>(destination.c_str());
+            return true;
+        }
+        else
+        {
+            std::cout << "Canceled or Failed save\n";
+            return false;
+        }
     }
 
 }
