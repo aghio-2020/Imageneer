@@ -5,10 +5,26 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
-#include <nfd.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#ifdef _MSC_VER
+#pragma warning(disable : 26812)
+#pragma warning(disable : 26495)
+#pragma warning(disable : 26451)
+#pragma warning(disable : 6294)
+#pragma warning(disable : 6201)
+#pragma warning(disable : 6262) // disable warning 4345
+#endif
+    #include <stb_image.h>
+    #include "portable-file-dialogs.h"
+#ifdef _MSC_VER
+#pragma warning(default : 26812)
+#pragma warning(default : 26495)
+#pragma warning(default : 26451)
+#pragma warning(default : 6294)
+#pragma warning(default : 6201)
+#pragma warning(default : 6262) // enable warning 4345 back
+#endif
 
 #include "ImageneerViewController.h"
 
@@ -194,6 +210,7 @@ namespace gui
         ImGui::End();
     }
 
+    //TODO: make a texture class
     void ImageneerViewController::LoadTextureFromFile()
     {
         int image_width = 0;
@@ -234,58 +251,33 @@ namespace gui
     //COULD: add a thread for the dialogs
     bool ImageneerViewController::OpenFileExplorerDialog()
     {
-        char* outPath = NULL;
-        nfdresult_t result = NFD_OpenDialog(kImageFilters, nullptr, &outPath);
+        auto file = pfd::open_file("Choose an image file", pfd::path::home(),
+            { "Image Files (.jpg, .png, .bmp)", "*.jpg, m *.jpeg, *.png, *.bmp" },
+            pfd::opt::force_overwrite);
 
-        if (result == NFD_OKAY) {
-            mDataSingletonInstance->GetImageDataReference().mFilePath = outPath;
-            mCVFunc.SetTmpFile(outPath);
 
-            std::cout << "Success!\n"; 
-            std::cout << outPath << std::endl;
-
-            free(outPath);
-
+        if (!file.result().empty())
+        {
+            std::string outPath = file.result().front();
+            mDataSingletonInstance->GetImageDataReference().mFilePath = const_cast<char*>(outPath.c_str());
+            mCVFunc.SetTmpFile(const_cast<char*>(outPath.c_str()));
             return true;
         }
-        else if (result == NFD_CANCEL) {
-            std::cout << "User pressed cancel.\n";
-            free(outPath);
+        else
+        {
+            std::cout << "File open canceled or failed";
             return false;
         }
-        else {
-            std::cout << "Error: " << NFD_GetError() << std::endl;
-            free(outPath);
-            return false;
-        }
+
     }
 
     bool ImageneerViewController::OpenSaveFileDialog()
     {
         char* outPath = NULL;
-        nfdresult_t result = NFD_SaveDialog(kImageFilters, nullptr, &outPath);
-
-        if (result == NFD_OKAY)
-        {
-            std::cout << "Saving file in " << outPath << "\n";
-            mCVFunc.SaveImage(outPath);
-            mDataSingletonInstance->GetImageDataReference().mFilePath = outPath;
-            free(outPath);
-            return true;
-        }
-        else if (result == NFD_CANCEL)
-        {
-            std::cout << "Cancel saving file\n";
-            free(outPath);
-            return false;
-        }
-        else
-        {
-            std::cout << "Error: " << NFD_GetError() << std::endl;
-            free(outPath);
-            return false;
-        }
+        mCVFunc.SaveImage(outPath);
+        mDataSingletonInstance->GetImageDataReference().mFilePath = outPath;
+        return true;
     }
 
-} // gui
+}
 

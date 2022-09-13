@@ -2,7 +2,24 @@
 
 #include <imgui.h>
 #include <GLFW/glfw3.h>
+
+#ifdef _MSC_VER
+#pragma warning(disable : 26812)
+#pragma warning(disable : 26495)
+#pragma warning(disable : 26451)
+#pragma warning(disable : 6294)
+#pragma warning(disable : 6201)
+#pragma warning(disable : 6262) // disable warning 4345
+#endif
 #include <opencv2/imgproc.hpp>
+#ifdef _MSC_VER
+#pragma warning(default : 26812)
+#pragma warning(default : 26495)
+#pragma warning(default : 26451)
+#pragma warning(default : 6294)
+#pragma warning(default : 6201)
+#pragma warning(default : 6262) // enable warning 4345 back
+#endif
 
 #include <mutex>
 
