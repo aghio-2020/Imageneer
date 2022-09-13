@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ImageneerData.h"
-#include "computerVisionFunc.h"
+#include "ComputerVisionFunc.h"
 
 #include <mutex>
 #include <memory>

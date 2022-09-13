@@ -37,6 +37,7 @@ namespace cvFunc
 		mDataSingletonInstance->GetImageDataReference().mTmpImage = cv::imread(path);
 	}
 
+	//TODO: handle changes to notify imgui that it should reload the image into RAM
 	void ComputerVisionFunc::SaveImage(const char* path)
 	{
 		cv::imwrite(path, mDataSingletonInstance->GetImageDataReference().mTmpImage);

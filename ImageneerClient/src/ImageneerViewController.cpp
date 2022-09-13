@@ -65,7 +65,6 @@ namespace gui
             ImGui::SetWindowSize(ImVec2(static_cast<float>(mDataSingletonInstance->GetMainWindowWidth()), 
                 static_cast<float>(mDataSingletonInstance->GetMainWindowHeight())));
         }
-        
 
         if (ImGui::Button("Search Image", ImVec2(150, 30)))
         {
@@ -244,16 +243,19 @@ namespace gui
 
             std::cout << "Success!\n"; 
             std::cout << outPath << std::endl;
+
             free(outPath);
 
             return true;
         }
         else if (result == NFD_CANCEL) {
             std::cout << "User pressed cancel.\n";
-            return true;
+            free(outPath);
+            return false;
         }
         else {
             std::cout << "Error: " << NFD_GetError() << std::endl;
+            free(outPath);
             return false;
         }
     }
@@ -274,11 +276,13 @@ namespace gui
         else if (result == NFD_CANCEL)
         {
             std::cout << "Cancel saving file\n";
-            return true;
+            free(outPath);
+            return false;
         }
         else
         {
             std::cout << "Error: " << NFD_GetError() << std::endl;
+            free(outPath);
             return false;
         }
     }
