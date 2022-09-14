@@ -38,6 +38,8 @@ private:
 
 	ImageneerDataSingleton* mDataSingletonInstance;
 	GLFWwindow* mWindow;
+
+	bool mShowImageWithRatio;
 };
 
 } // gui

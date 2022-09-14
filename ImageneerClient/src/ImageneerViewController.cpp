@@ -136,15 +136,22 @@ namespace gui
 
     void ImageneerViewController::ShowImageView()
     {
-        ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x,
+        float ratioY, ratioX = 1.0f;
+        if (mShowImageWithRatio)
+        {
+            ratioY = (ImGui::GetContentRegionAvail().y / 1.1f) / mDataSingletonInstance->GetImageDataHeight();
+            ratioX = ImGui::GetContentRegionAvail().x / (mDataSingletonInstance->GetImageDataWidth() * ratioY);
+        }
+
+        ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x * ratioX,
             ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-        if (mDataSingletonInstance->GetImageDataReference().mLoaded)
+        if (mDataSingletonInstance->GetImageDataLoaded())
         {
             //TODO: make function to determine the height and width of window to know how to display image
-            ImGui::Image((void*)(intptr_t)mDataSingletonInstance->GetImageDataReference().mTexture,
-                ImVec2(static_cast<float>(mDataSingletonInstance->GetImageDataReference().mWidth), 
-                    static_cast<float>(mDataSingletonInstance->GetImageDataReference().mHeight)));
+            ImGui::Image((void*)(intptr_t)mDataSingletonInstance->GetImageDataTexture(),
+                ImVec2(mDataSingletonInstance->GetImageDataWidth() * ratioY,
+                    mDataSingletonInstance->GetImageDataHeight() * ratioY));
         }
 
         ImGui::EndChild();
@@ -166,8 +173,11 @@ namespace gui
         {
             mDataSingletonInstance->SetShowImageView(false);
             mDataSingletonInstance->SetShowEffectsWindow(false);
-            mDataSingletonInstance->GetImageDataReference().Clear();
+            mDataSingletonInstance->ClearImageData();
         }
+        ImGui::SameLine();
+
+        ImGui::Checkbox("Show With Ratio", &mShowImageWithRatio);
     }
 
     void ImageneerViewController::ShowEffectsWindow()
@@ -215,7 +225,7 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataReference().mFilePath, &image_width, &image_height, NULL, 4);
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
@@ -241,25 +251,25 @@ namespace gui
         stbi_image_free(image_data);
 
         //TODO: setters and getters for ImageData
-        mDataSingletonInstance->GetImageDataReference().mTexture = image_texture;
-        mDataSingletonInstance->GetImageDataReference().mWidth = image_width;
-        mDataSingletonInstance->GetImageDataReference().mHeight = image_height;
+        mDataSingletonInstance->SetImageDataTexture(image_texture);
+        mDataSingletonInstance->SetImageDataWidth(image_width);
+        mDataSingletonInstance->SetImageDataHeight(image_height);
 
-        mDataSingletonInstance->GetImageDataReference().mLoaded = true;
+        mDataSingletonInstance->SetImageDataLoaded(true);
     }
 
     //COULD: add a thread for the dialogs
     bool ImageneerViewController::OpenFileExplorerDialog()
     {
         auto file = pfd::open_file("Choose an image file", pfd::path::home(),
-            { "Image Files (.jpg, .png, .bmp)", "*.jpg, m *.jpeg, *.png, *.bmp" },
+            { "Image Files (.jpg, .png, .bmp)", "*.jpg *.jpeg *.png *.bmp" },
             pfd::opt::force_overwrite).result();
 
 
         if (!file.empty())
         {
             std::string outPath = file.front();
-            mDataSingletonInstance->GetImageDataReference().mFilePath = const_cast<char*>(outPath.c_str());
+            mDataSingletonInstance->SetImageDataFilePath(const_cast<char*>(outPath.c_str()));
             mCVFunc.SetTmpFile(const_cast<char*>(outPath.c_str()));
             return true;
         }
@@ -280,7 +290,7 @@ namespace gui
         if (!destination.empty())
         {
             mCVFunc.SaveImage(destination.c_str());
-            mDataSingletonInstance->GetImageDataReference().mFilePath = const_cast<char*>(destination.c_str());
+            mDataSingletonInstance->SetImageDataFilePath(const_cast<char*>(destination.c_str()));
             return true;
         }
         else
