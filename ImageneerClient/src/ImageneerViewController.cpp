@@ -97,8 +97,11 @@ namespace gui
         {
             if (ImGui::Button("Open Camera", ImVec2(150, 30)))
             {
+                if (mCVCameraThread.joinable())
+                {
+                    mCVCameraThread.detach();
+                }
                 mCVCameraThread = std::thread(&cvFunc::ComputerVisionFunc::OpenCamera, &mCVFunc);
-                mDataSingletonInstance->SetShowCameraView(true);
             }
         }
         else if (ImGui::Button("Close Camera", ImVec2(150, 30)))
@@ -113,7 +116,7 @@ namespace gui
             ShowImageView();
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(100));
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
 
         ImGui::End();
     }
@@ -136,22 +139,22 @@ namespace gui
 
     void ImageneerViewController::ShowImageView()
     {
-        float ratioY, ratioX = 1.0f;
+        float ratioY = 1.0f; float ratioX = 1.0f;
         if (mShowImageWithRatio)
         {
             ratioY = (ImGui::GetContentRegionAvail().y / 1.1f) / mDataSingletonInstance->GetImageDataHeight();
             ratioX = ImGui::GetContentRegionAvail().x / (mDataSingletonInstance->GetImageDataWidth() * ratioY);
         }
 
-        ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x * ratioX,
+        ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x / ratioX,
             ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
 
         if (mDataSingletonInstance->GetImageDataLoaded())
         {
             //TODO: make function to determine the height and width of window to know how to display image
             ImGui::Image((void*)(intptr_t)mDataSingletonInstance->GetImageDataTexture(),
-                ImVec2(mDataSingletonInstance->GetImageDataWidth() * ratioY,
-                    mDataSingletonInstance->GetImageDataHeight() * ratioY));
+                ImVec2(static_cast<float>(mDataSingletonInstance->GetImageDataWidth() * ratioY),
+                    static_cast<float>(mDataSingletonInstance->GetImageDataHeight() * ratioY)));
         }
 
         ImGui::EndChild();
@@ -177,7 +180,7 @@ namespace gui
         }
         ImGui::SameLine();
 
-        ImGui::Checkbox("Show With Ratio", &mShowImageWithRatio);
+        ImGui::Checkbox("Adjust Size", &mShowImageWithRatio);
     }
 
     void ImageneerViewController::ShowEffectsWindow()
@@ -275,7 +278,7 @@ namespace gui
         }
         else
         {
-            std::cout << "File open canceled or failed";
+            std::cout << "File open canceled or failed\n";
             return false;
         }
 
