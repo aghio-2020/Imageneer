@@ -23,78 +23,87 @@
 #endif
 
 
-namespace cvFunc
+const char* kCameraWindowName = "Camera Display";
+
+struct ComputerVisionFunc::CVData
 {
-	const char* kCameraWindowName = "Camera Display";
+	cv::Mat mTmpImage;
+};
 
-	struct ComputerVisionFunc::CVData
+ComputerVisionFunc::~ComputerVisionFunc() = default;
+
+ComputerVisionFunc::ComputerVisionFunc()
+{
+	mDataSingletonInstance = gui::ImageneerDataSingleton::Instance();
+	mCVData = std::make_unique<ComputerVisionFunc::CVData>();
+}
+
+bool ComputerVisionFunc::IsCameraOpened()
+{
+	return mDataSingletonInstance->GetShowCameraView();
+}
+
+void ComputerVisionFunc::StopShowingCamera()
+{
+	mDataSingletonInstance->SetShowCameraView(false);
+}
+
+void ComputerVisionFunc::UpdateTmpFile()
+{
+	if (!mCVData->mTmpImage.empty())
 	{
-		cv::Mat mTmpImage;
-	};
+		cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
+		return;
+	}
+	mCVData->mTmpImage = cv::imread(mDataSingletonInstance->GetImageDataFilePath());
+	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
+}
 
-	ComputerVisionFunc::~ComputerVisionFunc() = default;
+//TODO: handle changes to notify imgui that it should reload the image into RAM
+//TODO: save file in new filepath and update all the data for the file
+void ComputerVisionFunc::SaveImage(const char* path)
+{
+	cv::imwrite(path, mCVData->mTmpImage);
+	mDataSingletonInstance->SetImageDataFilePath(path);
+	mDataSingletonInstance->UpdateTmpFileData();
+}
 
-	ComputerVisionFunc::ComputerVisionFunc()
+void ComputerVisionFunc::OpenCamera()
+{
+	cv::VideoCapture capture(0);
+
+	if (!capture.isOpened()) 
 	{
-		mDataSingletonInstance = gui::ImageneerDataSingleton::Instance();
-		mCVData = std::make_unique<ComputerVisionFunc::CVData>();
+		std::cout << "cannot open camera\n";
+		return;
 	}
 
-	bool ComputerVisionFunc::IsCameraOpened()
-	{
-		return mDataSingletonInstance->GetShowCameraView();
-	}
+	cv::namedWindow(kCameraWindowName);
 
-	void ComputerVisionFunc::StopShowingCamera()
-	{
-		mDataSingletonInstance->SetShowCameraView(false);
-	}
+	mDataSingletonInstance->SetShowCameraView(true);
 
-	void ComputerVisionFunc::StartShowingCamera()
+	//TODO: add another signaling/messaging system more adecuate for this app
+	cv::Mat image;
+	//add Effects Conditions Here
+	while (mDataSingletonInstance->GetShowCameraView())
 	{
-		mDataSingletonInstance->SetShowCameraView(true);
-	}
-
-	void ComputerVisionFunc::SetTmpFile(const char* path)
-	{
-		mCVData->mTmpImage = cv::imread(path);
-	}
-
-	//TODO: handle changes to notify imgui that it should reload the image into RAM
-	void ComputerVisionFunc::SaveImage(const char* path)
-	{
-		cv::imwrite(path, mCVData->mTmpImage);
-	}
-
-	void ComputerVisionFunc::OpenCamera()
-	{
-		cv::VideoCapture capture(0);
-
-		if (!capture.isOpened()) 
+		capture >> image;
+		if (image.empty() || !capture.isOpened())
 		{
-			std::cout << "cannot open camera\n";
+			mDataSingletonInstance->SetShowCameraView(false);
 			return;
 		}
-
-		cv::namedWindow(kCameraWindowName);
-
-		mDataSingletonInstance->SetShowCameraView(true);
-
-		//TODO: add another signaling/messaging system more adecuate for this app
-		cv::Mat image;
-		//add Effects Conditions Here
-		while (mDataSingletonInstance->GetShowCameraView())
-		{
-			capture >> image;
-			if (image.empty() || !capture.isOpened())
-			{
-				mDataSingletonInstance->SetShowCameraView(false);
-				return;
-			}
-			cv::imshow(kCameraWindowName, image);
-			cv::waitKey(10);
-		}
-		
-		cv::destroyWindow(kCameraWindowName);
+		cv::imshow(kCameraWindowName, image);
+		cv::waitKey(10);
 	}
+		
+	capture.release();
+	cv::destroyWindow(kCameraWindowName);
 }
+
+void ComputerVisionFunc::Grayscale()
+{
+	return;
+}
+
+

@@ -4,23 +4,23 @@
 
 #include "ImageneerData.h"
 
-namespace cvFunc
+
+class ComputerVisionFunc
 {
-	class ComputerVisionFunc
-	{
-	public:
-		ComputerVisionFunc();
-		~ComputerVisionFunc();
-		void OpenCamera();
-		bool IsCameraOpened();
-		void StopShowingCamera();
-		void StartShowingCamera();
-		void SetTmpFile(const char* path);
-		void SaveImage(const char* path);
-	private:
-		struct CVData;
-		std::unique_ptr<CVData> mCVData;
-		gui::ImageneerDataSingleton* mDataSingletonInstance;
-		std::mutex mMutex;
-	};
-}
+public:
+	ComputerVisionFunc();
+	~ComputerVisionFunc();
+	void OpenCamera();
+	bool IsCameraOpened();
+	void StopShowingCamera();
+	void UpdateTmpFile();
+	void SaveImage(const char* path);
+
+	void Grayscale();
+private:
+	struct CVData;
+	std::unique_ptr<CVData> mCVData;
+	gui::ImageneerDataSingleton* mDataSingletonInstance;
+	std::mutex mMutex;
+};
+

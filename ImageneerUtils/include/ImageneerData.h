@@ -13,11 +13,10 @@ namespace gui
 	class ImageneerDataSingleton
 	{
 	public:
-		static ImageneerDataSingleton *Instance()
-		{
-			static ImageneerDataSingleton *mInstance = new ImageneerDataSingleton;
-			return mInstance;
-		}
+		static ImageneerDataSingleton* Instance();
+
+		const char* GetTmpFilePath();
+		void UpdateTmpFileData();
 
 		const int &GetMainWindowWidth();
 		const int &GetMainWindowHeight();
@@ -35,21 +34,25 @@ namespace gui
 		const int& GetImageDataHeight();
 		const GLuint& GetImageDataTexture();
 		const char* GetImageDataFilePath();
+		const char* GetImageDataFileType();
 		const bool& GetImageDataLoaded();
 		void ClearImageData();
 
 		void SetImageDataWidth(const int &width);
 		void SetImageDataHeight(const int &height);
 		void SetImageDataTexture(const GLuint &texture);
-		void SetImageDataFilePath(char *filePath);
+		void SetImageDataFilePath(const char *filePath);
+		void SetImageDataFileType(const char* type);
 		void SetImageDataLoaded(const bool &loaded);
 
 	private:
 		ImageneerDataSingleton();
-
+		
+		std::mutex mMutex;
 		struct ImageData;
 		std::unique_ptr<ImageData> mImageData;
-		std::mutex mMutex;
+		struct EffectsData;
+		std::unique_ptr<EffectsData> mEffectsData;
 		int mMainWindowWidth;
 		int mMainWindowHeight;
 		bool mShowImageView;

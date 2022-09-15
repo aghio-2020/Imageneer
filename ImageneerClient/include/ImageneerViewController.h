@@ -31,15 +31,13 @@ private:
 	void ShowEffectsWindow();
 	void ShowImageView();
 
-	cvFunc::ComputerVisionFunc mCVFunc;
+	ComputerVisionFunc mCVFunc;
 
 	std::thread mCVCameraThread;
 	std::thread mCVImgProcThread;
 
 	ImageneerDataSingleton* mDataSingletonInstance;
 	GLFWwindow* mWindow;
-
-	bool mShowImageWithRatio;
 };
 
 } // gui

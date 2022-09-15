@@ -36,6 +36,7 @@ namespace gui
 {
     const char* kMainWindowName = "Imageneer";
     const char* kImageFilters = "png,jpg,bmp";
+    const float kSpacingRatio = 1.1f;
 
     //TODO: make class to show logs in another window, initialize here passing glfw window
 
@@ -88,6 +89,8 @@ namespace gui
             {
                 LoadTextureFromFile();
                 mDataSingletonInstance->SetShowImageView(true);
+                mDataSingletonInstance->UpdateTmpFileData();
+                mCVFunc.UpdateTmpFile();
             }
         }
 
@@ -101,7 +104,7 @@ namespace gui
                 {
                     mCVCameraThread.detach();
                 }
-                mCVCameraThread = std::thread(&cvFunc::ComputerVisionFunc::OpenCamera, &mCVFunc);
+                mCVCameraThread = std::thread(&ComputerVisionFunc::OpenCamera, &mCVFunc);
             }
         }
         else if (ImGui::Button("Close Camera", ImVec2(150, 30)))
@@ -116,7 +119,7 @@ namespace gui
             ShowImageView();
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        //std::this_thread::sleep_for(std::chrono::microseconds(10));
 
         ImGui::End();
     }
@@ -139,24 +142,25 @@ namespace gui
 
     void ImageneerViewController::ShowImageView()
     {
-        float ratioY = 1.0f; float ratioX = 1.0f;
-        if (mShowImageWithRatio)
-        {
-            ratioY = (ImGui::GetContentRegionAvail().y / 1.1f) / mDataSingletonInstance->GetImageDataHeight();
-            ratioX = ImGui::GetContentRegionAvail().x / (mDataSingletonInstance->GetImageDataWidth() * ratioY);
-        }
+        float ratioY = (ImGui::GetContentRegionAvail().y / 1.1f) / mDataSingletonInstance->GetImageDataHeight();
+        float ratioX = ImGui::GetContentRegionAvail().x / (mDataSingletonInstance->GetImageDataWidth() * ratioY);
+        float offSet = ImGui::GetContentRegionAvail().x - (ImGui::GetContentRegionAvail().x * ratioX);
 
         ImGui::BeginChild("Image Display", ImVec2(ImGui::GetContentRegionAvail().x / ratioX,
-            ImGui::GetContentRegionAvail().y / 1.1f), true, ImGuiWindowFlags_HorizontalScrollbar);
+            ImGui::GetContentRegionAvail().y / kSpacingRatio), true, ImGuiWindowFlags_HorizontalScrollbar);
 
         if (mDataSingletonInstance->GetImageDataLoaded())
         {
-            //TODO: make function to determine the height and width of window to know how to display image
             ImGui::Image((void*)(intptr_t)mDataSingletonInstance->GetImageDataTexture(),
                 ImVec2(static_cast<float>(mDataSingletonInstance->GetImageDataWidth() * ratioY),
                     static_cast<float>(mDataSingletonInstance->GetImageDataHeight() * ratioY)));
         }
 
+        ImGui::EndChild();
+        ImGui::SameLine();
+        ImGui::BeginChild("Some Settings", ImVec2(ImGui::GetContentRegionAvail().x - offSet, 
+            ImGui::GetContentRegionAvail().y / kSpacingRatio));
+        ImGui::Text("Some Features");
         ImGui::EndChild();
 
         if (mDataSingletonInstance->GetShowEffectsWindow())
@@ -179,9 +183,11 @@ namespace gui
             mDataSingletonInstance->ClearImageData();
         }
         ImGui::SameLine();
-
-        ImGui::Checkbox("Adjust Size", &mShowImageWithRatio);
     }
+
+    //TODO: move somewhere else
+    float blur;
+    float grayscale;
 
     void ImageneerViewController::ShowEffectsWindow()
     {
@@ -201,6 +207,7 @@ namespace gui
             mDataSingletonInstance->SetShowEffectsWindow(false);
         }
 
+        //TODO: use imageProc thread here
         //COULD: Store a tmp file to share the file between both parts of the application
         ImGui::NewLine();
         ImGui::Text("Effects");
@@ -208,22 +215,22 @@ namespace gui
         {
             std::cout << "Implement Face Detection\n";
         }
-        ImGui::SameLine();
         if (ImGui::Button("Blur Image"))
         {
             std::cout << "Implement Blur Image\n";
         }
         ImGui::SameLine();
+        ImGui::SliderFloat("blur", &blur, 0.0f, 1.0f);
         if (ImGui::Button("Grayscale"))
         {
+            mCVFunc.Grayscale();
             std::cout << "Implement Grayscale\n";
         }
-        ImGui::SameLine();
 
         ImGui::End();
     }
 
-    //TODO: make a texture class
+    //TODO: make a texture class/struct
     void ImageneerViewController::LoadTextureFromFile()
     {
         int image_width = 0;
@@ -253,7 +260,6 @@ namespace gui
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
         stbi_image_free(image_data);
 
-        //TODO: setters and getters for ImageData
         mDataSingletonInstance->SetImageDataTexture(image_texture);
         mDataSingletonInstance->SetImageDataWidth(image_width);
         mDataSingletonInstance->SetImageDataHeight(image_height);
@@ -268,12 +274,10 @@ namespace gui
             { "Image Files (.jpg, .png, .bmp)", "*.jpg *.jpeg *.png *.bmp" },
             pfd::opt::force_overwrite).result();
 
-
         if (!file.empty())
         {
             std::string outPath = file.front();
             mDataSingletonInstance->SetImageDataFilePath(const_cast<char*>(outPath.c_str()));
-            mCVFunc.SetTmpFile(const_cast<char*>(outPath.c_str()));
             return true;
         }
         else
@@ -294,6 +298,7 @@ namespace gui
         {
             mCVFunc.SaveImage(destination.c_str());
             mDataSingletonInstance->SetImageDataFilePath(const_cast<char*>(destination.c_str()));
+            mCVFunc.UpdateTmpFile();
             return true;
         }
         else

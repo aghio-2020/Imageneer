@@ -18,9 +18,13 @@
 #pragma warning(default : 6262) // enable warning 4345 back
 #endif
 
+#include <string>
 
 namespace gui
 {
+    const unsigned int kMaxTmpFileNameSize = 30;
+    const char* kTmpFileName = "tmp";
+
     //tmp image data is shared through out the program and used to decide what to show
     struct ImageneerDataSingleton::ImageData
     {
@@ -29,10 +33,16 @@ namespace gui
         int mHeight;
         GLuint mTexture;
         char* mFilePath;
-        char* mTmpFilePath;
+        char* mFileType;
+        char* mTmpFileName;
         bool mLoaded = false;
 
         void Clear() { mWidth, mHeight, mTexture = 0; mLoaded = false; mFilePath = nullptr; }
+    };
+
+    struct ImageneerDataSingleton::EffectsData
+    {
+        int mBlurRatio;
     };
 
     ImageneerDataSingleton::ImageneerDataSingleton()
@@ -43,6 +53,38 @@ namespace gui
         mShowCameraView = false;
         mShowEffectsWindow = false;
         mImageData = std::make_unique<ImageneerDataSingleton::ImageData>();
+        mEffectsData = std::make_unique<ImageneerDataSingleton::EffectsData>();
+    }
+
+    ImageneerDataSingleton* ImageneerDataSingleton::Instance()
+    {
+        static ImageneerDataSingleton* mInstance = new ImageneerDataSingleton;
+        return mInstance;
+    }
+
+    //the program works over the tmp file that contains all the changes
+    const char* ImageneerDataSingleton::GetTmpFilePath()
+    {
+        return mImageData->mTmpFileName;
+    }
+
+    //TODO: should work with strings instead of char*
+    void ImageneerDataSingleton::UpdateTmpFileData()
+    {
+        if (!mImageData->mTmpFileName)
+        {
+            mImageData->mTmpFileName = new char[kMaxTmpFileNameSize];
+        }
+        std::string tmpfile = mImageData->mFilePath;
+        size_t pos;
+        pos = tmpfile.rfind(".");
+        std::string typestr = tmpfile.substr(pos);
+        char* filetype = new char[typestr.length() + 1];
+        std::strcpy(filetype, typestr.c_str());
+        mImageData->mFileType = filetype;
+        std::strcpy(mImageData->mTmpFileName, kTmpFileName);
+        std::strcat(mImageData->mTmpFileName, filetype);
+        delete [] filetype;
     }
 
     const int &ImageneerDataSingleton::GetMainWindowWidth()
@@ -64,27 +106,6 @@ namespace gui
     const bool &ImageneerDataSingleton::GetShowEffectsWindow()
     {
         return mShowEffectsWindow;
-    }
-
-    const int& ImageneerDataSingleton::GetImageDataWidth()
-    {
-        return mImageData->mWidth;
-    }
-    const int& ImageneerDataSingleton::GetImageDataHeight()
-    {
-        return mImageData->mHeight;
-    }
-    const GLuint& ImageneerDataSingleton::GetImageDataTexture()
-    {
-        return mImageData->mTexture;
-    }
-    const char* ImageneerDataSingleton::GetImageDataFilePath()
-    {
-        return mImageData->mFilePath;
-    }
-    const bool& ImageneerDataSingleton::GetImageDataLoaded()
-    {
-        return mImageData->mLoaded;
     }
 
     void ImageneerDataSingleton::SetMainWindowWidth(const int& width)
@@ -118,6 +139,33 @@ namespace gui
         mMutex.unlock();
     }
 
+    //ImageData
+
+    const int& ImageneerDataSingleton::GetImageDataWidth()
+    {
+        return mImageData->mWidth;
+    }
+    const int& ImageneerDataSingleton::GetImageDataHeight()
+    {
+        return mImageData->mHeight;
+    }
+    const GLuint& ImageneerDataSingleton::GetImageDataTexture()
+    {
+        return mImageData->mTexture;
+    }
+    const char* ImageneerDataSingleton::GetImageDataFilePath()
+    {
+        return mImageData->mFilePath;
+    }
+    const char* ImageneerDataSingleton::GetImageDataFileType()
+    {
+        return mImageData->mFileType;
+    }
+    const bool& ImageneerDataSingleton::GetImageDataLoaded()
+    {
+        return mImageData->mLoaded;
+    }
+
     void ImageneerDataSingleton::SetImageDataWidth(const int &width)
     {
         mImageData->mWidth = width;
@@ -130,9 +178,19 @@ namespace gui
     {
         mImageData->mTexture = texture;
     }
-    void ImageneerDataSingleton::SetImageDataFilePath(char *filePath)
+    void ImageneerDataSingleton::SetImageDataFilePath(const char *filePath)
     {
-        mImageData->mFilePath = filePath;
+        char* tmp = new char[strlen(filePath) + 1];
+        std::strcpy(tmp, filePath);
+        mImageData->mFilePath = tmp;
+        delete[] tmp;
+    }
+    void ImageneerDataSingleton::SetImageDataFileType(const char *type)
+    {
+        char* tmp = new char[strlen(type) + 1];
+        std::strcpy(tmp, type);
+        mImageData->mFilePath = tmp;
+        delete[] tmp;
     }
     void ImageneerDataSingleton::SetImageDataLoaded(const bool &loaded)
     {
