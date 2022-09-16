@@ -7,8 +7,6 @@
 
 namespace gui
 {
-	typedef void* HandlerImage;
-
 	//the client shares the information that is being used to control the program
 	class ImageneerDataSingleton
 	{
@@ -23,12 +21,14 @@ namespace gui
 		const bool &GetShowImageView();
 		const bool &GetShowCameraView();
 		const bool &GetShowEffectsWindow();
+		const bool &GetUpdateImageTexture();
 
 		void SetMainWindowWidth(const int& width);
 		void SetMainWindowHeight(const int& height);
 		void SetShowImageView(const bool& showImage);
 		void SetShowCameraView(const bool& showCamera);
 		void SetShowEffectsWindow(const bool& showEffectsWindow);
+		void SetUpdateImageTexture(const bool& updateImageTexture);
 
 		const int& GetImageDataWidth();
 		const int& GetImageDataHeight();
@@ -58,5 +58,6 @@ namespace gui
 		bool mShowImageView;
 		bool mShowCameraView;
 		bool mShowEffectsWindow;
+		bool mUpdateImageTexture;
 	};
 }

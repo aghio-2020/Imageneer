@@ -18,6 +18,8 @@
 #pragma warning(default : 6262) // enable warning 4345 back
 #endif
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <string>
 
 namespace gui
@@ -47,13 +49,14 @@ namespace gui
 
     ImageneerDataSingleton::ImageneerDataSingleton()
     {
+        mImageData = std::make_unique<ImageneerDataSingleton::ImageData>();
+        mEffectsData = std::make_unique<ImageneerDataSingleton::EffectsData>();
         mMainWindowWidth = 0;
         mMainWindowHeight = 0;
         mShowImageView = false;
         mShowCameraView = false;
         mShowEffectsWindow = false;
-        mImageData = std::make_unique<ImageneerDataSingleton::ImageData>();
-        mEffectsData = std::make_unique<ImageneerDataSingleton::EffectsData>();
+        mUpdateImageTexture = false;
     }
 
     ImageneerDataSingleton* ImageneerDataSingleton::Instance()
@@ -61,6 +64,7 @@ namespace gui
         static ImageneerDataSingleton* mInstance = new ImageneerDataSingleton;
         return mInstance;
     }
+
 
     //the program works over the tmp file that contains all the changes
     const char* ImageneerDataSingleton::GetTmpFilePath()
@@ -107,6 +111,10 @@ namespace gui
     {
         return mShowEffectsWindow;
     }
+    const bool& ImageneerDataSingleton::GetUpdateImageTexture()
+    {
+        return mUpdateImageTexture;
+    }
 
     void ImageneerDataSingleton::SetMainWindowWidth(const int& width)
     {
@@ -136,6 +144,12 @@ namespace gui
     {
         mMutex.lock();
         mShowEffectsWindow = showEffectsWindow;
+        mMutex.unlock();
+    }
+    void ImageneerDataSingleton::SetUpdateImageTexture(const bool& updateImageTexture)
+    {
+        mMutex.lock();
+        mUpdateImageTexture = updateImageTexture;
         mMutex.unlock();
     }
 

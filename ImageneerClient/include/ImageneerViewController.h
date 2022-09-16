@@ -27,7 +27,8 @@ public:
 private:
 	bool OpenFileExplorerDialog();
 	bool OpenSaveFileDialog();
-	void LoadTextureFromFile();
+	bool LoadTextureFromFile();
+	bool ReloadTextureFromTmpFile();
 	void ShowEffectsWindow();
 	void ShowImageView();
 

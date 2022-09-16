@@ -1,6 +1,8 @@
 #include "ComputerVisionFunc.h"
 
 #include <iostream>
+#include <filesystem>
+#include <cstdio>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 26812)
@@ -48,10 +50,12 @@ void ComputerVisionFunc::StopShowingCamera()
 	mDataSingletonInstance->SetShowCameraView(false);
 }
 
-void ComputerVisionFunc::UpdateTmpFile()
+void ComputerVisionFunc::SwapTmpFile()
 {
 	if (!mCVData->mTmpImage.empty())
 	{
+		
+		mCVData->mTmpImage = cv::imread(mDataSingletonInstance->GetImageDataFilePath());
 		cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
 		return;
 	}
@@ -104,6 +108,15 @@ void ComputerVisionFunc::OpenCamera()
 void ComputerVisionFunc::Grayscale()
 {
 	return;
+}
+
+void ComputerVisionFunc::Blur()
+{
+	int sigma = 3;
+	int ksize = (sigma * 5) | 1;
+	cv::Mat tmp = std::move(mCVData->mTmpImage);
+	cv::GaussianBlur(tmp, mCVData->mTmpImage, cv::Size(ksize, ksize), sigma, sigma);
+	mDataSingletonInstance->SetUpdateImageTexture(true);
 }
 
 

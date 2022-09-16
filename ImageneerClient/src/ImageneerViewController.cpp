@@ -85,13 +85,12 @@ namespace gui
 
         if (ImGui::Button("Search Image", ImVec2(150, 30)))
         {
-            if (OpenFileExplorerDialog())
+            if (OpenFileExplorerDialog() && LoadTextureFromFile())
             {
-                LoadTextureFromFile();
                 mDataSingletonInstance->SetShowImageView(true);
                 mDataSingletonInstance->UpdateTmpFileData();
-                mCVFunc.UpdateTmpFile();
-            }
+                mCVFunc.SwapTmpFile();
+            } 
         }
 
         ImGui::SameLine();
@@ -142,6 +141,12 @@ namespace gui
 
     void ImageneerViewController::ShowImageView()
     {
+        if (mDataSingletonInstance->GetUpdateImageTexture())
+        {
+            ReloadTextureFromTmpFile();
+            mDataSingletonInstance->SetUpdateImageTexture(false);
+        }
+
         float ratioY = (ImGui::GetContentRegionAvail().y / 1.1f) / mDataSingletonInstance->GetImageDataHeight();
         float ratioX = ImGui::GetContentRegionAvail().x / (mDataSingletonInstance->GetImageDataWidth() * ratioY);
         float offSet = ImGui::GetContentRegionAvail().x - (ImGui::GetContentRegionAvail().x * ratioX);
@@ -208,7 +213,6 @@ namespace gui
         }
 
         //TODO: use imageProc thread here
-        //COULD: Store a tmp file to share the file between both parts of the application
         ImGui::NewLine();
         ImGui::Text("Effects");
         if (ImGui::Button("Detect Faces"))
@@ -217,6 +221,9 @@ namespace gui
         }
         if (ImGui::Button("Blur Image"))
         {
+            //TODO: pass parameters indicated by the ui
+            //COULD: make effects parameters class and store in singleton EffectsData atribute
+            mCVFunc.Blur();
             std::cout << "Implement Blur Image\n";
         }
         ImGui::SameLine();
@@ -231,7 +238,7 @@ namespace gui
     }
 
     //TODO: make a texture class/struct
-    void ImageneerViewController::LoadTextureFromFile()
+    bool ImageneerViewController::LoadTextureFromFile()
     {
         int image_width = 0;
         int image_height = 0;
@@ -239,7 +246,7 @@ namespace gui
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
-            return;
+            return false;
         }
 
         // Create a OpenGL texture identifier
@@ -265,6 +272,47 @@ namespace gui
         mDataSingletonInstance->SetImageDataHeight(image_height);
 
         mDataSingletonInstance->SetImageDataLoaded(true);
+
+        return true;
+    }
+
+    //TODO: find how to unload the opengl texture to optimize memory
+    bool ImageneerViewController::ReloadTextureFromTmpFile()
+    {
+        int image_width = 0;
+        int image_height = 0;
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetTmpFilePath(), &image_width, &image_height, NULL, 4);
+        if (image_data == NULL)
+        {
+            std::cout << "NULL image data\n";
+            return false;
+        }
+
+        // Create a OpenGL texture identifier
+        GLuint image_texture;
+        glGenTextures(1, &image_texture);
+        glBindTexture(GL_TEXTURE_2D, image_texture);
+
+        // Setup filtering parameters for display
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+        stbi_image_free(image_data);
+
+        mDataSingletonInstance->SetImageDataTexture(image_texture);
+        mDataSingletonInstance->SetImageDataWidth(image_width);
+        mDataSingletonInstance->SetImageDataHeight(image_height);
+
+        mDataSingletonInstance->SetImageDataLoaded(true);
+
+        return true;
     }
 
     //COULD: add a thread for the dialogs
@@ -298,7 +346,7 @@ namespace gui
         {
             mCVFunc.SaveImage(destination.c_str());
             mDataSingletonInstance->SetImageDataFilePath(const_cast<char*>(destination.c_str()));
-            mCVFunc.UpdateTmpFile();
+            mCVFunc.SwapTmpFile();
             return true;
         }
         else

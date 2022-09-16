@@ -13,10 +13,11 @@ public:
 	void OpenCamera();
 	bool IsCameraOpened();
 	void StopShowingCamera();
-	void UpdateTmpFile();
+	void SwapTmpFile();
 	void SaveImage(const char* path);
 
 	void Grayscale();
+	void Blur();
 private:
 	struct CVData;
 	std::unique_ptr<CVData> mCVData;
