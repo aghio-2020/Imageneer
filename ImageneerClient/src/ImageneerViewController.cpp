@@ -238,15 +238,12 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        FILE* file = stbi__fopen(mDataSingletonInstance->GetImageDataFilePath(), "rb");
-        unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, NULL, 4);
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
             return false;
         }
-
-        fclose(file);
 
         // Create a OpenGL texture identifier
         GLuint image_texture;
@@ -280,15 +277,12 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        FILE* file = stbi__fopen(mDataSingletonInstance->GetTmpFilePath(), "rb");
-        unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, NULL, 4);
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetTmpFilePath(), &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
             return false;
         }
-
-        fclose(file);
 
         // Create a OpenGL texture identifier
         GLuint image_texture;
