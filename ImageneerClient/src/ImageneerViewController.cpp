@@ -7,24 +7,20 @@
 
 
 #define STB_IMAGE_IMPLEMENTATION
-#ifdef _MSC_VER
 #pragma warning(disable : 26812)
 #pragma warning(disable : 26495)
 #pragma warning(disable : 26451)
 #pragma warning(disable : 6294)
 #pragma warning(disable : 6201)
 #pragma warning(disable : 6262) // disable warning 4345
-#endif
     #include <stb_image.h>
-    #include "portable-file-dialogs.h"
-#ifdef _MSC_VER
+    #include <portable-file-dialogs.h>
 #pragma warning(default : 26812)
 #pragma warning(default : 26495)
 #pragma warning(default : 26451)
 #pragma warning(default : 6294)
 #pragma warning(default : 6201)
 #pragma warning(default : 6262) // enable warning 4345 back
-#endif
 
 #include "ImageneerViewController.h"
 
