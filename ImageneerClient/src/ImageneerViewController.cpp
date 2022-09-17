@@ -241,7 +241,7 @@ namespace gui
         unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
-            std::cout << "NULL image data\n";
+            std::cout << "NULL image data" << image_data << "\n";
             return false;
         }
 
