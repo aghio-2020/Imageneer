@@ -12,9 +12,9 @@
 #pragma warning(disable : 6201)
 #pragma warning(disable : 6262) // disable warning 4345
 #endif
+#include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
 #ifdef _MSC_VER
 #pragma warning(default : 26812)
 #pragma warning(default : 26495)
@@ -50,17 +50,11 @@ void ComputerVisionFunc::StopShowingCamera()
 	mDataSingletonInstance->SetShowCameraView(false);
 }
 
-void ComputerVisionFunc::SwapTmpFile()
+void ComputerVisionFunc::UpdateTmpFile()
 {
-	if (!mCVData->mTmpImage.empty())
-	{
-		
-		mCVData->mTmpImage = cv::imread(mDataSingletonInstance->GetImageDataFilePath());
-		cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
-		return;
-	}
-	mCVData->mTmpImage = cv::imread(mDataSingletonInstance->GetImageDataFilePath());
+	mCVData->mTmpImage = cv::imread(mDataSingletonInstance->GetImageDataFilePath(), cv::IMREAD_ANYCOLOR);
 	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
+	std::cout << mDataSingletonInstance->GetImageDataFilePath() << std::endl;
 }
 
 //TODO: handle changes to notify imgui that it should reload the image into RAM
@@ -116,6 +110,7 @@ void ComputerVisionFunc::Blur()
 	int ksize = (sigma * 5) | 1;
 	cv::Mat tmp = std::move(mCVData->mTmpImage);
 	cv::GaussianBlur(tmp, mCVData->mTmpImage, cv::Size(ksize, ksize), sigma, sigma);
+	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
 	mDataSingletonInstance->SetUpdateImageTexture(true);
 }
 

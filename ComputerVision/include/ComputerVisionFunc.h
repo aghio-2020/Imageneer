@@ -13,7 +13,7 @@ public:
 	void OpenCamera();
 	bool IsCameraOpened();
 	void StopShowingCamera();
-	void SwapTmpFile();
+	void UpdateTmpFile();
 	void SaveImage(const char* path);
 
 	void Grayscale();

@@ -89,7 +89,7 @@ namespace gui
             {
                 mDataSingletonInstance->SetShowImageView(true);
                 mDataSingletonInstance->UpdateTmpFileData();
-                mCVFunc.SwapTmpFile();
+                mCVFunc.UpdateTmpFile();
             } 
         }
 
@@ -318,6 +318,7 @@ namespace gui
     //COULD: add a thread for the dialogs
     bool ImageneerViewController::OpenFileExplorerDialog()
     {
+        //TODO: save into disk the previous path
         auto file = pfd::open_file("Choose an image file", pfd::path::home(),
             { "Image Files (.jpg, .png, .bmp)", "*.jpg *.jpeg *.png *.bmp" },
             pfd::opt::force_overwrite).result();
@@ -346,7 +347,7 @@ namespace gui
         {
             mCVFunc.SaveImage(destination.c_str());
             mDataSingletonInstance->SetImageDataFilePath(const_cast<char*>(destination.c_str()));
-            mCVFunc.SwapTmpFile();
+            mCVFunc.UpdateTmpFile();
             return true;
         }
         else
