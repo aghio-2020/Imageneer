@@ -12,16 +12,15 @@
 #pragma warning(disable : 26451)
 #pragma warning(disable : 6294)
 #pragma warning(disable : 6201)
-#pragma warning(disable : 6262) // disable warning 4345
+#pragma warning(disable : 6262)
+#include <stb_image.h>
+#include <portable-file-dialogs.h>
 #pragma warning(default : 26812)
 #pragma warning(default : 26495)
 #pragma warning(default : 26451)
 #pragma warning(default : 6294)
 #pragma warning(default : 6201)
-#pragma warning(default : 6262) // enable warning 4345 back
-
-    #include <stb_image.h>
-    #include <portable-file-dialogs.h>
+#pragma warning(default : 6262)
 #include "ImageneerViewController.h"
 
 #include <iostream>
