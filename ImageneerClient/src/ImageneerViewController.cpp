@@ -24,6 +24,7 @@
 #include "ImageneerViewController.h"
 
 #include <iostream>
+#include <cstdlib>
 
 //TODO: implement with MVC
 
@@ -237,7 +238,8 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, 4);
+        FILE* file = fopen(mDataSingletonInstance->GetImageDataFilePath(), "rb");
+        unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
@@ -276,7 +278,9 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetTmpFilePath(), &image_width, &image_height, NULL, 4);
+        int image_height = 0;
+        FILE* file = fopen(mDataSingletonInstance->GetTmpFilePath(), "rb");
+        unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
             std::cout << "NULL image data\n";
