@@ -246,6 +246,8 @@ namespace gui
             return false;
         }
 
+        fclose(file);
+
         // Create a OpenGL texture identifier
         GLuint image_texture;
         glGenTextures(1, &image_texture);
@@ -285,6 +287,8 @@ namespace gui
             std::cout << "NULL image data\n";
             return false;
         }
+
+        fclose(file);
 
         // Create a OpenGL texture identifier
         GLuint image_texture;
