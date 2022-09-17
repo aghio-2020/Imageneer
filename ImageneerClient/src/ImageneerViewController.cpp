@@ -238,7 +238,7 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        FILE* file = fopen(mDataSingletonInstance->GetImageDataFilePath(), "rb");
+        FILE* file = stbi__fopen(mDataSingletonInstance->GetImageDataFilePath(), "rb");
         unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
@@ -280,7 +280,7 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        FILE* file = fopen(mDataSingletonInstance->GetTmpFilePath(), "rb");
+        FILE* file = stbi__fopen(mDataSingletonInstance->GetTmpFilePath(), "rb");
         unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, NULL, 4);
         if (image_data == NULL)
         {
