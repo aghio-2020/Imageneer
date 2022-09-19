@@ -124,7 +124,7 @@ void ComputerVisionFunc::DetectFaces()
 	mCVData->mFaceCascade.detectMultiScale(mCVData->mTmpImage, mCVData->mFaces, 1.1, 10);
 	for (int i = 0; i < mCVData->mFaces.size(); i++)
 	{
-		cv::rectangle(mCVData->mTmpImage, mCVData->mFaces[i].tl(), mCVData->mFaces[i].br(), cv::Scalar(255, 100, 100), 10);
+		cv::rectangle(mCVData->mTmpImage, mCVData->mFaces[i].tl(), mCVData->mFaces[i].br(), cv::Scalar(10, 255, 10), 10);
 	}
 	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
 	mDataSingletonInstance->SetUpdateImageTexture(true);
