@@ -80,6 +80,8 @@ void ComputerVisionFunc::SaveImage(const char* path)
 	mDataSingletonInstance->UpdateTmpFileData();
 }
 
+
+//TODO: allow user to take pictures with camera and save them
 void ComputerVisionFunc::OpenCameraWithFaceDetection()
 {
 	cv::VideoCapture capture(0);

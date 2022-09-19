@@ -101,6 +101,15 @@ namespace gui
                 }
                 mCVCameraThread = std::thread(&ComputerVisionFunc::OpenCamera, &mCVFunc);
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Open FD Camera", ImVec2(150, 30)))
+            {
+                if (mCVCameraThread.joinable())
+                {
+                    mCVCameraThread.detach();
+                }
+                mCVCameraThread = std::thread(&ComputerVisionFunc::OpenCameraWithFaceDetection, &mCVFunc);
+            }
         }
         else
         {
@@ -117,7 +126,7 @@ namespace gui
             ShowImageView();
         }
 
-        //std::this_thread::sleep_for(std::chrono::microseconds(10));
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
 
         ImGui::End();
     }
