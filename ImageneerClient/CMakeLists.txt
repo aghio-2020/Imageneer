@@ -55,6 +55,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${UTILS_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${COMPUTERVISION_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${UTILS_INCLUDE_DIR})
 
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/Resources/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/Resources)
+
 if(WIN32)
 	target_link_libraries(IMGUI kernel32 user32 gdi32 opengl32 ${DEPENDENCIES_DIR}/GLFW/lib/glfw3.lib)
 	target_link_libraries(glad ${DEPENDENCIES_DIR}/GLFW/lib/glfw3.lib)

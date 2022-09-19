@@ -211,14 +211,15 @@ namespace gui
         //TODO: use imageProc thread here
         ImGui::NewLine();
         ImGui::Text("Effects");
+        //TODO: pass parameters indicated by the ui
+        //COULD: make effects parameters class and store in singleton EffectsData atribute
         if (ImGui::Button("Detect Faces"))
         {
+            mCVFunc.DetectFaces();
             std::cout << "Implement Face Detection\n";
         }
         if (ImGui::Button("Blur Image"))
         {
-            //TODO: pass parameters indicated by the ui
-            //COULD: make effects parameters class and store in singleton EffectsData atribute
             mCVFunc.Blur();
             std::cout << "Implement Blur Image\n";
         }

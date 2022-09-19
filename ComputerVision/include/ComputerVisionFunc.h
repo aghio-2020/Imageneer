@@ -16,6 +16,7 @@ public:
 	void UpdateTmpFile();
 	void SaveImage(const char* path);
 
+	void DetectFaces();
 	void Grayscale();
 	void Blur();
 private:

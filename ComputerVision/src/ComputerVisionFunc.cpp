@@ -15,6 +15,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/objdetect.hpp>
 #ifdef _MSC_VER
 #pragma warning(default : 26812)
 #pragma warning(default : 26495)
@@ -30,6 +31,17 @@ const char* kCameraWindowName = "Camera Display";
 struct ComputerVisionFunc::CVData
 {
 	cv::Mat mTmpImage;
+	cv::CascadeClassifier mFaceCascade;
+	std::vector<cv::Rect> mFaces;
+
+	CVData()
+	{
+		mFaceCascade.load("../../Resources/haarcascade_frontalface_default.xml");
+		if (mFaceCascade.empty())
+		{
+			std::cout << "XML not loaded\n";
+		}
+	}
 };
 
 ComputerVisionFunc::~ComputerVisionFunc() = default;
@@ -101,7 +113,21 @@ void ComputerVisionFunc::OpenCamera()
 
 void ComputerVisionFunc::Grayscale()
 {
-	return;
+	cv::Mat tmp = std::move(mCVData->mTmpImage);
+	cv::cvtColor(tmp, mCVData->mTmpImage, cv::COLOR_BGR2GRAY);
+	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
+	mDataSingletonInstance->SetUpdateImageTexture(true);
+}
+
+void ComputerVisionFunc::DetectFaces()
+{
+	mCVData->mFaceCascade.detectMultiScale(mCVData->mTmpImage, mCVData->mFaces, 1.1, 10);
+	for (int i = 0; i < mCVData->mFaces.size(); i++)
+	{
+		cv::rectangle(mCVData->mTmpImage, mCVData->mFaces[i].tl(), mCVData->mFaces[i].br(), cv::Scalar(255, 100, 100), 10);
+	}
+	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
+	mDataSingletonInstance->SetUpdateImageTexture(true);
 }
 
 void ComputerVisionFunc::Blur()
