@@ -11,13 +11,14 @@ public:
 	ComputerVisionFunc();
 	~ComputerVisionFunc();
 	void OpenCamera();
+	void OpenCameraWithFaceDetection();
 	bool IsCameraOpened();
 	void StopShowingCamera();
 	void UpdateTmpFile();
 	void SaveImage(const char* path);
 
 	void DetectFaces();
-	void Grayscale();
+	void ToggleGrayscale();
 	void Blur();
 private:
 	struct CVData;

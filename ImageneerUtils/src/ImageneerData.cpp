@@ -45,7 +45,8 @@ namespace gui
 
     struct ImageneerDataSingleton::EffectsData
     {
-        int mBlurRatio;
+        bool mCameraFaceDetection = false;
+        bool mGrayscale = false;
     };
 
     ImageneerDataSingleton::ImageneerDataSingleton()
@@ -214,5 +215,25 @@ namespace gui
     void ImageneerDataSingleton::ClearImageData()
     {
         mImageData->Clear();
+    }
+
+    const bool& ImageneerDataSingleton::GetEffectsDataGrayscaleApplied()
+    {
+        return mEffectsData->mGrayscale;
+    }
+    const bool& ImageneerDataSingleton::GetCameraFaceDetection()
+    {
+        return mEffectsData->mCameraFaceDetection;
+    }
+
+    void ImageneerDataSingleton::SetEffectsDataGrayscaleApplied(const bool& applied)
+    {
+        mEffectsData->mGrayscale = applied;
+    }
+    void ImageneerDataSingleton::SetCameraFaceDetection(const bool& detection)
+    {
+        mMutex.lock();
+        mEffectsData->mCameraFaceDetection = detection;
+        mMutex.unlock();
     }
 }

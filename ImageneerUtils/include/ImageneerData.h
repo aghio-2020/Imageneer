@@ -45,6 +45,12 @@ namespace gui
 		void SetImageDataFileType(const char* type);
 		void SetImageDataLoaded(const bool &loaded);
 
+		const bool& GetEffectsDataGrayscaleApplied();
+		const bool& GetCameraFaceDetection();
+
+		void SetEffectsDataGrayscaleApplied(const bool& applied);
+		void SetCameraFaceDetection(const bool& detection);
+
 	private:
 		ImageneerDataSingleton();
 		

@@ -102,11 +102,14 @@ namespace gui
                 mCVCameraThread = std::thread(&ComputerVisionFunc::OpenCamera, &mCVFunc);
             }
         }
-        else if (ImGui::Button("Close Camera", ImVec2(150, 30)))
+        else
         {
-            mCVFunc.StopShowingCamera();
-            mDataSingletonInstance->SetShowCameraView(false);
-            mCVCameraThread.detach();
+            if (ImGui::Button("Close Camera", ImVec2(150, 30)))
+            {
+                mCVFunc.StopShowingCamera();
+                mDataSingletonInstance->SetShowCameraView(false);
+                mCVCameraThread.detach();
+            }
         }
 
         if (mDataSingletonInstance->GetShowImageView())
@@ -227,7 +230,7 @@ namespace gui
         ImGui::SliderFloat("blur", &blur, 0.0f, 1.0f);
         if (ImGui::Button("Grayscale"))
         {
-            mCVFunc.Grayscale();
+            mCVFunc.ToggleGrayscale();
             std::cout << "Implement Grayscale\n";
         }
 

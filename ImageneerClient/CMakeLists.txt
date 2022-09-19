@@ -15,7 +15,7 @@ set(PORTABLE_FILEDIALOG_DIR ${DEPENDENCIES_DIR}/portable-file-dialog)
 set(STB_DIR ${DEPENDENCIES_DIR}/stb)
 set(OpenGL_GL_PREFERENCE GLVND)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/runtime)
 
 file(GLOB_RECURSE CLIENT_SOURCES
 	"${CLIENT_INCLUDE_DIR}/*.h"
@@ -55,7 +55,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${UTILS_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${COMPUTERVISION_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${UTILS_INCLUDE_DIR})
 
-add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                        ${CMAKE_SOURCE_DIR}/Resources/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/Resources)
 

@@ -27,19 +27,23 @@
 
 
 const char* kCameraWindowName = "Camera Display";
+const char* kHaarResourcePath = "Resources/haarcascade_frontalface_default.xml";
+const char* kHaarDebugResourcePath = "../../Resources/haarcascade_frontalface_default.xml";
 
 struct ComputerVisionFunc::CVData
 {
 	cv::Mat mTmpImage;
 	cv::CascadeClassifier mFaceCascade;
-	std::vector<cv::Rect> mFaces;
 
 	CVData()
 	{
-		mFaceCascade.load("../../Resources/haarcascade_frontalface_default.xml");
-		if (mFaceCascade.empty())
+		//TODO: find a better way to load the correct path
+		if (!mFaceCascade.load(kHaarResourcePath))
 		{
-			std::cout << "XML not loaded\n";
+			if (!mFaceCascade.load(kHaarDebugResourcePath))
+			{
+				std::cout << "XML cannot be readed";
+			}
 		}
 	}
 };
@@ -69,8 +73,6 @@ void ComputerVisionFunc::UpdateTmpFile()
 	std::cout << mDataSingletonInstance->GetImageDataFilePath() << std::endl;
 }
 
-//TODO: handle changes to notify imgui that it should reload the image into RAM
-//TODO: save file in new filepath and update all the data for the file
 void ComputerVisionFunc::SaveImage(const char* path)
 {
 	cv::imwrite(path, mCVData->mTmpImage);
@@ -78,7 +80,7 @@ void ComputerVisionFunc::SaveImage(const char* path)
 	mDataSingletonInstance->UpdateTmpFileData();
 }
 
-void ComputerVisionFunc::OpenCamera()
+void ComputerVisionFunc::OpenCameraWithFaceDetection()
 {
 	cv::VideoCapture capture(0);
 
@@ -92,9 +94,21 @@ void ComputerVisionFunc::OpenCamera()
 
 	mDataSingletonInstance->SetShowCameraView(true);
 
-	//TODO: add another signaling/messaging system more adecuate for this app
+	//COULD: add another signaling/messaging system more adecuate for this app
 	cv::Mat image;
-	//add Effects Conditions Here
+
+	std::vector<cv::Rect> faces;
+
+	cv::CascadeClassifier faceCascade;
+	
+	if (!faceCascade.load(kHaarResourcePath))
+	{
+		if (!faceCascade.load(kHaarDebugResourcePath))
+		{
+			std::cout << "XML cannot be readed";
+		}
+	}
+
 	while (mDataSingletonInstance->GetShowCameraView())
 	{
 		capture >> image;
@@ -103,6 +117,13 @@ void ComputerVisionFunc::OpenCamera()
 			mDataSingletonInstance->SetShowCameraView(false);
 			return;
 		}
+	
+		faceCascade.detectMultiScale(image, faces, 1.1, 10);
+		for (int i = 0; i < faces.size(); i++)
+		{
+			cv::rectangle(image, faces[i].tl(), faces[i].br(), cv::Scalar(10, 255, 10), 10);
+		}
+
 		cv::imshow(kCameraWindowName, image);
 		cv::waitKey(10);
 	}
@@ -111,20 +132,64 @@ void ComputerVisionFunc::OpenCamera()
 	cv::destroyWindow(kCameraWindowName);
 }
 
-void ComputerVisionFunc::Grayscale()
+void ComputerVisionFunc::OpenCamera()
+{
+	cv::VideoCapture capture(0);
+
+	if (!capture.isOpened())
+	{
+		std::cout << "cannot open camera\n";
+		return;
+	}
+
+	cv::namedWindow(kCameraWindowName);
+
+	mDataSingletonInstance->SetShowCameraView(true);
+
+	//COULD: add another signaling/messaging system more adecuate for this app
+	cv::Mat image;
+
+	while (mDataSingletonInstance->GetShowCameraView())
+	{
+		capture >> image;
+		if (image.empty() || !capture.isOpened())
+		{
+			mDataSingletonInstance->SetShowCameraView(false);
+			return;
+		}
+
+		cv::imshow(kCameraWindowName, image);
+		cv::waitKey(10);
+	}
+
+	capture.release();
+	cv::destroyWindow(kCameraWindowName);
+}
+
+void ComputerVisionFunc::ToggleGrayscale()
 {
 	cv::Mat tmp = std::move(mCVData->mTmpImage);
-	cv::cvtColor(tmp, mCVData->mTmpImage, cv::COLOR_BGR2GRAY);
+	if (!mDataSingletonInstance->GetEffectsDataGrayscaleApplied())
+	{
+		cv::cvtColor(tmp, mCVData->mTmpImage, cv::COLOR_BGR2GRAY);
+		mDataSingletonInstance->SetEffectsDataGrayscaleApplied(true);
+	}
+	else
+	{
+		cv::cvtColor(tmp, mCVData->mTmpImage, cv::COLOR_GRAY2BGR);
+		mDataSingletonInstance->SetEffectsDataGrayscaleApplied(false);
+	}
 	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
 	mDataSingletonInstance->SetUpdateImageTexture(true);
 }
 
 void ComputerVisionFunc::DetectFaces()
 {
-	mCVData->mFaceCascade.detectMultiScale(mCVData->mTmpImage, mCVData->mFaces, 1.1, 10);
-	for (int i = 0; i < mCVData->mFaces.size(); i++)
+	std::vector<cv::Rect> faces;
+	mCVData->mFaceCascade.detectMultiScale(mCVData->mTmpImage, faces, 1.1, 10);
+	for (int i = 0; i < faces.size(); i++)
 	{
-		cv::rectangle(mCVData->mTmpImage, mCVData->mFaces[i].tl(), mCVData->mFaces[i].br(), cv::Scalar(10, 255, 10), 10);
+		cv::rectangle(mCVData->mTmpImage, faces[i].tl(), faces[i].br(), cv::Scalar(10, 255, 10), 10);
 	}
 	cv::imwrite(mDataSingletonInstance->GetTmpFilePath(), mCVData->mTmpImage);
 	mDataSingletonInstance->SetUpdateImageTexture(true);
