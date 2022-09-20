@@ -259,6 +259,8 @@ namespace gui
             return false;
         }
 
+        std::cout << "Image passed into RAM\n";
+
         // Create a OpenGL texture identifier
         GLuint image_texture;
         glGenTextures(1, &image_texture);
