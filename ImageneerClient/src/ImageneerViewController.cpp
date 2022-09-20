@@ -6,15 +6,15 @@
 #include <imgui_impl_glfw.h>
 
 
-#define STB_IMAGE_IMPLEMENTATION
 #pragma warning(disable : 26812)
 #pragma warning(disable : 26495)
 #pragma warning(disable : 26451)
 #pragma warning(disable : 6294)
 #pragma warning(disable : 6201)
 #pragma warning(disable : 6262)
-#include <stb_image.h>
-#include <portable-file-dialogs.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include "portable-file-dialogs.h"
 #pragma warning(default : 26812)
 #pragma warning(default : 26495)
 #pragma warning(default : 26451)
@@ -251,7 +251,8 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, 4);
+        int components;
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, &components, STBI_rgb_alpha);
         if (image_data == NULL)
         {
             std::cout << "NULL image data" << image_data << "\n";
