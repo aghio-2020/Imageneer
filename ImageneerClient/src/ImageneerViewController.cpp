@@ -300,8 +300,9 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetTmpFilePath(), &image_width, &image_height, NULL, 4);
-        if (image_data == NULL)
+        int components;
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, &components, STBI_rgb_alpha);
+        if (!image_data)
         {
             std::cout << "NULL image data\n";
             return false;

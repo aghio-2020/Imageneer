@@ -42,7 +42,7 @@ target_include_directories(glad PRIVATE ${DEPENDENCIES_DIR})
 target_include_directories(glad PRIVATE ${GLFW_DIR})
 
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} ${CLIENT_SOURCES})
+add_executable (${PROJECT_NAME} ${CLIENT_SOURCES} ${STB_DIR}/stb_image.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${DEPENDENCIES_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${DEPENDENCIES_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CLIENT_INCLUDE_DIR})
