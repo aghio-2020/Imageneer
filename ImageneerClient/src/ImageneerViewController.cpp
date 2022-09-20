@@ -253,7 +253,7 @@ namespace gui
         int image_height = 0;
         int components;
         unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, &components, STBI_rgb_alpha);
-        if (image_data == NULL)
+        if (!image_data)
         {
             std::cout << "NULL image data" << image_data << "\n";
             return false;
