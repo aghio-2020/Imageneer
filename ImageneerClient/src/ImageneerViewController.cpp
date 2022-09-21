@@ -5,32 +5,25 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
-#ifdef WIN32
-    #pragma warning(disable : 26812)
-    #pragma warning(disable : 26495)
-    #pragma warning(disable : 26451)
-    #pragma warning(disable : 6294)
-    #pragma warning(disable : 6201)
-    #pragma warning(disable : 6262)
-#elif defined unix
-    #pragma GCC diagnostic push 
-#endif
-    #define STB_IMAGE_IMPLEMENTATION
-    #include "stb_image.h"
-    #include "portable-file-dialogs.h"
-#ifdef WIN32
-    #pragma warning(default : 26812)
-    #pragma warning(default : 26495)
-    #pragma warning(default : 26451)
-    #pragma warning(default : 6294)
-    #pragma warning(default : 6201)
-    #pragma warning(default : 6262)
-#elif defined unix
-    #pragma GCC diagnostic pop 
-#endif
+#define STB_IMAGE_IMPLEMENTATION
+#pragma warning(disable : 26812)
+#pragma warning(disable : 26495)
+#pragma warning(disable : 26451)
+#pragma warning(disable : 6294)
+#pragma warning(disable : 6201)
+#pragma warning(disable : 6262)
+#include "stb_image.h"
+#include "portable-file-dialogs.h"
+#pragma warning(default : 26812)
+#pragma warning(default : 26495)
+#pragma warning(default : 26451)
+#pragma warning(default : 6294)
+#pragma warning(default : 6201)
+#pragma warning(default : 6262)
 #include "ImageneerViewController.h"
 
 #include <iostream>
+#include <filesystem>
 #include <cstdlib>
 
 //TODO: implement with MVC
@@ -258,7 +251,7 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, STBI_rgb_alpha);
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, 4);
         if (!image_data)
         {
             std::cout << "NULL image data\n";
@@ -297,10 +290,11 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, STBI_rgb_alpha);
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetTmpFilePath(), &image_width, &image_height, NULL, 4);
+
         if (!image_data)
         {
-            std::cout << "NULL image data\n";
+            std::cout << "NULL image data, can't reload\n";
             return false;
         }
 
