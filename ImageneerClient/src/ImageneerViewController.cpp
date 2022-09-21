@@ -258,15 +258,12 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        int components;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, &components, STBI_rgb_alpha);
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, STBI_rgb_alpha);
         if (!image_data)
         {
-            std::cout << "NULL image data" << image_data << "\n";
+            std::cout << "NULL image data\n";
             return false;
         }
-
-        std::cout << "Image passed into RAM\n";
 
         // Create a OpenGL texture identifier
         GLuint image_texture;
@@ -300,8 +297,7 @@ namespace gui
     {
         int image_width = 0;
         int image_height = 0;
-        int components;
-        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, &components, STBI_rgb_alpha);
+        unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, STBI_rgb_alpha);
         if (!image_data)
         {
             std::cout << "NULL image data\n";
