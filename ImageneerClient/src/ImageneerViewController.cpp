@@ -155,7 +155,7 @@ namespace gui
             mDataSingletonInstance->SetUpdateImageTexture(false);
         }
 
-        float ratioY = (ImGui::GetContentRegionAvail().y / 1.1f) / mDataSingletonInstance->GetImageDataHeight();
+        float ratioY = (ImGui::GetContentRegionAvail().y / 1.1f) /mDataSingletonInstance->GetImageDataHeight(); 
         float ratioX = ImGui::GetContentRegionAvail().x / (mDataSingletonInstance->GetImageDataWidth() * ratioY);
         float offSet = ImGui::GetContentRegionAvail().x - (ImGui::GetContentRegionAvail().x * ratioX);
 
@@ -211,7 +211,7 @@ namespace gui
         ImGui::Text("Options");
         if (ImGui::Button("Save Image", ImVec2(150, 30)))
         {
-            std::cout << "Saving image and stuff\n";
+            std::cout << "Saving image and stuff" << std::endl;
             OpenSaveFileDialog();
         }
         ImGui::SameLine();
@@ -220,7 +220,6 @@ namespace gui
             mDataSingletonInstance->SetShowEffectsWindow(false);
         }
 
-        //TODO: use imageProc thread here
         ImGui::NewLine();
         ImGui::Text("Effects");
         //TODO: pass parameters indicated by the ui
@@ -228,19 +227,19 @@ namespace gui
         if (ImGui::Button("Detect Faces"))
         {
             mCVFunc.DetectFaces();
-            std::cout << "Implement Face Detection\n";
+            std::cout << "Implement Face Detection" << std::endl;
         }
         if (ImGui::Button("Blur Image"))
         {
             mCVFunc.Blur();
-            std::cout << "Implement Blur Image\n";
+            std::cout << "Implement Blur Image" << std::endl;
         }
         ImGui::SameLine();
         ImGui::SliderFloat("blur", &blur, 0.0f, 1.0f);
         if (ImGui::Button("Grayscale"))
         {
             mCVFunc.ToggleGrayscale();
-            std::cout << "Implement Grayscale\n";
+            std::cout << "Implement Grayscale" << std::endl;
         }
 
         ImGui::End();
@@ -254,7 +253,7 @@ namespace gui
         unsigned char* image_data = stbi_load(mDataSingletonInstance->GetImageDataFilePath(), &image_width, &image_height, NULL, 4);
         if (!image_data)
         {
-            std::cout << "NULL image data\n";
+            std::cout << "NULL image data" << std::endl;
             return false;
         }
 
@@ -294,7 +293,7 @@ namespace gui
 
         if (!image_data)
         {
-            std::cout << "NULL image data, can't reload\n";
+            std::cout << "NULL image data, can't reload" << std::endl;;
             return false;
         }
 
@@ -341,7 +340,7 @@ namespace gui
         }
         else
         {
-            std::cout << "File open canceled or failed\n";
+            std::cout << "File open canceled or failed" << std::endl;
             return false;
         }
 
@@ -362,7 +361,7 @@ namespace gui
         }
         else
         {
-            std::cout << "Canceled or Failed save\n";
+            std::cout << "Canceled or Failed save" << std::endl;
             return false;
         }
     }

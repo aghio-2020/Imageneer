@@ -37,7 +37,7 @@ namespace gui
         char* mTmpFileName;
         bool mLoaded = false;
 
-        void Clear() { mWidth, mHeight, mTexture = 0; mLoaded = false; mFilePath = nullptr; }
+        void Clear() { mWidth, mHeight, mTexture = 0; mLoaded = false; mFilePath = nullptr; mFileType = nullptr; mTmpFileName = nullptr; }
     };
 
     struct ImageneerDataSingleton::EffectsData
@@ -117,39 +117,33 @@ namespace gui
 
     void ImageneerDataSingleton::SetMainWindowWidth(const int& width)
     {
-        mMutex.lock();
+        std::lock_guard<std::mutex> lock(mMutex);
         mMainWindowWidth = width;
-        mMutex.unlock();
     }
     void ImageneerDataSingleton::SetMainWindowHeight(const int& height)
     {
-        mMutex.lock();
+        std::lock_guard<std::mutex> lock(mMutex);
         mMainWindowHeight = height;
-        mMutex.unlock();
     }
     void ImageneerDataSingleton::SetShowImageView(const bool& showImage)
     {
-        mMutex.lock();
+        std::lock_guard<std::mutex> lock(mMutex);
         mShowImageView = showImage;
-        mMutex.unlock();
     }
     void ImageneerDataSingleton::SetShowCameraView(const bool& showCamera)
     {
-        mMutex.lock();
+        std::lock_guard<std::mutex> lock(mMutex);
         mShowCameraView = showCamera;
-        mMutex.unlock();
     }
     void ImageneerDataSingleton::SetShowEffectsWindow(const bool& showEffectsWindow)
     {
-        mMutex.lock();
+        std::lock_guard<std::mutex> lock(mMutex);
         mShowEffectsWindow = showEffectsWindow;
-        mMutex.unlock();
     }
     void ImageneerDataSingleton::SetUpdateImageTexture(const bool& updateImageTexture)
     {
-        mMutex.lock();
+        std::lock_guard<std::mutex> lock(mMutex);
         mUpdateImageTexture = updateImageTexture;
-        mMutex.unlock();
     }
 
     //ImageData
@@ -207,10 +201,12 @@ namespace gui
     }
     void ImageneerDataSingleton::SetImageDataLoaded(const bool &loaded)
     {
+        std::lock_guard<std::mutex> lock(mMutex);
         mImageData->mLoaded = loaded;
     }
     void ImageneerDataSingleton::ClearImageData()
     {
+        std::lock_guard<std::mutex> lock(mMutex);
         mImageData->Clear();
     }
 
@@ -225,12 +221,12 @@ namespace gui
 
     void ImageneerDataSingleton::SetEffectsDataGrayscaleApplied(const bool& applied)
     {
+        std::lock_guard<std::mutex> lock(mMutex);
         mEffectsData->mGrayscale = applied;
     }
     void ImageneerDataSingleton::SetCameraFaceDetection(const bool& detection)
     {
-        mMutex.lock();
+        std::lock_guard<std::mutex> lock(mMutex);
         mEffectsData->mCameraFaceDetection = detection;
-        mMutex.unlock();
     }
 }

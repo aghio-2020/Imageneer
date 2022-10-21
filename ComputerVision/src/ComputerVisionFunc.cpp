@@ -34,12 +34,9 @@ struct ComputerVisionFunc::CVData
 	CVData()
 	{
 		//TODO: find a better way to load the correct path
-		if (!mFaceCascade.load(kHaarResourcePath))
+		if (!mFaceCascade.load(kHaarResourcePath) && !mFaceCascade.load(kHaarDebugResourcePath))
 		{
-			if (!mFaceCascade.load(kHaarDebugResourcePath))
-			{
-				std::cout << "XML cannot be readed";
-			}
+			std::cout << "XML cannot be readed" << std::endl;
 		}
 	}
 };
@@ -76,7 +73,7 @@ void ComputerVisionFunc::SaveImage(const char* path)
 	mDataSingletonInstance->UpdateTmpFileData();
 }
 
-
+//SHOULD: make a class for each of the things displayed that derive from a base class Display
 //TODO: allow user to take pictures with camera and save them
 void ComputerVisionFunc::OpenCameraWithFaceDetection()
 {
@@ -84,27 +81,19 @@ void ComputerVisionFunc::OpenCameraWithFaceDetection()
 
 	if (!capture.isOpened()) 
 	{
-		std::cout << "cannot open camera\n";
+		std::cout << "cannot open camera" << std::endl;
 		return;
 	}
 
 	cv::namedWindow(kCameraWindowName);
-
 	mDataSingletonInstance->SetShowCameraView(true);
-
-	//COULD: add another signaling/messaging system more adecuate for this app
 	cv::Mat image;
-
 	std::vector<cv::Rect> faces;
-
 	cv::CascadeClassifier faceCascade;
 	
-	if (!faceCascade.load(kHaarResourcePath))
+	if (!faceCascade.load(kHaarResourcePath) && !faceCascade.load(kHaarDebugResourcePath))
 	{
-		if (!faceCascade.load(kHaarDebugResourcePath))
-		{
-			std::cout << "XML cannot be readed";
-		}
+		std::cout << "XML cannot be readed" << std::endl;
 	}
 
 	while (mDataSingletonInstance->GetShowCameraView())
@@ -115,18 +104,18 @@ void ComputerVisionFunc::OpenCameraWithFaceDetection()
 			mDataSingletonInstance->SetShowCameraView(false);
 			return;
 		}
-	
 		faceCascade.detectMultiScale(image, faces, 1.1, 10);
 		for (int i = 0; i < faces.size(); i++)
 		{
 			cv::rectangle(image, faces[i].tl(), faces[i].br(), cv::Scalar(10, 255, 10), 10);
 		}
-
 		cv::imshow(kCameraWindowName, image);
-		cv::waitKey(10);
+		image.release();
+		cv::waitKey(100);
 	}
 		
 	capture.release();
+	faceCascade.~CascadeClassifier();
 	cv::destroyWindow(kCameraWindowName);
 }
 
@@ -136,15 +125,12 @@ void ComputerVisionFunc::OpenCamera()
 
 	if (!capture.isOpened())
 	{
-		std::cout << "cannot open camera\n";
+		std::cout << "cannot open camera" << std::endl;
 		return;
 	}
 
 	cv::namedWindow(kCameraWindowName);
-
 	mDataSingletonInstance->SetShowCameraView(true);
-
-	//COULD: add another signaling/messaging system more adecuate for this app
 	cv::Mat image;
 
 	while (mDataSingletonInstance->GetShowCameraView())
@@ -155,11 +141,12 @@ void ComputerVisionFunc::OpenCamera()
 			mDataSingletonInstance->SetShowCameraView(false);
 			return;
 		}
-
 		cv::imshow(kCameraWindowName, image);
+		image.release();
 		cv::waitKey(10);
 	}
 
+	image.release();
 	capture.release();
 	cv::destroyWindow(kCameraWindowName);
 }
